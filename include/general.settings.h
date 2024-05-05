@@ -1,3 +1,5 @@
+#ifndef GENERAL_SETTINGS_H
+#define GENERAL_SETTINGS_H
 
 //***********DEBUG SETTINGS*************//
 
@@ -17,3 +19,5 @@ enum DbgLevel: bool {
 
 //***********CSV SETTINGS*************//
 #define DELIMITER_CHAR ","
+
+#endif //GENERAL_SETTINGS_H

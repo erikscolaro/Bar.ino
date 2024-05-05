@@ -2,10 +2,11 @@
 
 #include "recipe.settings.h"
 #include "general.settings.h"
-
-#include "SdFat.h"
 #include "Ingredient\Ingredient.h"
 #include "Warehouse\Warehouse.h"
+
+#include "SdFat.h"
+#include "SdFatConfig.h"
 
 enum Action {
     MIX='M',

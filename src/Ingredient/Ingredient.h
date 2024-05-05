@@ -10,7 +10,7 @@
 class Ingredient {
 private:
     char _name[NAME_LENGTH] {""};
-    int _qty {0}, _mqty {999}, _actuator {-1};
+    int  _actuator=-1, _qty=0, _mqty=999;
     bool _isLiquid {false};
     bool _isEditable {false};
 

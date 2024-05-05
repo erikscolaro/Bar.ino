@@ -3,12 +3,15 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
-#include <SPI.h>
+
+#include "SdFat.h"
+#include "SdFatConfig.h"
 
 #include "warehouse.settings.h"
-#include "Ingredient\Ingredient.h"
 #include "general.settings.h"
-#include "SdFat.h"
+#include "Ingredient\Ingredient.h"
+
+
 
 class Warehouse{
     public:

@@ -1,5 +1,6 @@
 #include "Warehouse.h"
 
+
 Warehouse::Warehouse(){
     PRINT_DBG(WAREHOUSE,"Checking where ingredients info are stored...");
     EEPROM.begin(); uint8_t magic_number= EEPROM.read(0); EEPROM.end();
