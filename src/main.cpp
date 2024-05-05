@@ -3,6 +3,8 @@
 #include "Warehouse/Warehouse.h"
 #include "Recipe/Recipe.h"
 
+
+//global variables are stored in ram! remember that ...
 Warehouse magazzino = Warehouse();
 Recipe ricetta= Recipe("", &magazzino);
 

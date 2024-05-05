@@ -1,6 +1,10 @@
 #include "Recipe.h"
 
-Recipe::Recipe(const char *dir, Warehouse* warehouse):_warehouse(warehouse){
+Recipe::Recipe(){
+}
+
+Recipe::Recipe(const char *dir, Warehouse *warehouse) : _warehouse(warehouse)
+{
     SdFat SD;
     SD.begin(SD_SS);
     File file=SD.open(dir);
@@ -25,6 +29,7 @@ Recipe::Recipe(const char *dir, Warehouse* warehouse):_warehouse(warehouse){
     file.close();
     SD.end();
 
+    calculateIngredientQty();
     _isAvaiable = checkIngredientsQty();
 }
 
@@ -56,15 +61,24 @@ bool Recipe::addIngredient(Step step){
         PRINT_DBG(RECIPE, "Error: required to store a nullptr ingredient object!");
         return false;
     }else {
-        for (int i=0; i<_ingNum; i++){
-            if (_ingredients[i]==step.getIngredient()){
-                _ingredientsQty[i]+=step.getQty();
-                return true;
-            }
-        }
         _ingredients[_ingNum]=step.getIngredient();
         _ingNum+=1;
         return true;
+    }
+}
+
+void Recipe::calculateIngredientQty(){
+    memset(_ingredientsQty, 0, sizeof(_ingredientsQty));
+    for (int j=0; j<_stepsNum; j++){
+        Step* temp = &_steps[j];
+        if (temp->getAction()==ADD && temp->getIngredient()!=nullptr){
+            for (int i=0; i<_ingNum; i++){
+                if (_ingredients[i]==temp->getIngredient()){
+                    _ingredientsQty[i]+=temp->getModQty();
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -77,10 +91,24 @@ Recipe::Step::Step(){
 Recipe::Step::Step(char *line, Recipe *recipe){
     char *token = strtok(line, DELIMITER_CHAR);
     this->_action=static_cast<Action>(token[0]);
-    token = strtok(nullptr, DELIMITER_CHAR);
-    this->_ingredient=recipe->_warehouse->getIngredient(token);
-    token = strtok(nullptr, DELIMITER_CHAR);
-    this->_qty=strtol(DELIMITER_CHAR,nullptr, 10);
+    switch(this->_action){
+        case ADD:
+            token = strtok(nullptr, DELIMITER_CHAR);
+            this->_ingredient=recipe->_warehouse->getIngredient(token);
+            token = strtok(nullptr, DELIMITER_CHAR);
+            this->_qty=strtol(DELIMITER_CHAR,nullptr, 10);
+            this->_modQty=this->_qty;
+            break;
+        case MIX:
+            break; //TODO
+        case SHAKE:
+            break; //TODO
+        default:
+            this->_ingredient=nullptr;
+            this->_qty=-1;
+            this->_modQty=-1;
+    }
+   
 }
 
 Action Recipe::Step::getAction()
@@ -91,6 +119,11 @@ Action Recipe::Step::getAction()
 short Recipe::Step::getQty()
 {
     return this->_qty;
+}
+
+short Recipe::Step::getModQty()
+{
+    return this->_modQty;
 }
 
 Ingredient *Recipe::Step::getIngredient()

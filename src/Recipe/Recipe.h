@@ -23,10 +23,12 @@ class Recipe {
                 Step(char* line, Recipe* recipe);
                 Action getAction();
                 short getQty();
+                short getModQty();
                 Ingredient* getIngredient();
             private:
                 Action _action = SKIP;
                 short _qty = -1;
+                short _modQty = -1;
                 Ingredient* _ingredient = nullptr;
         };
 
@@ -35,15 +37,18 @@ class Recipe {
         Warehouse* _warehouse;
         Step _steps[STEPS_NUM];
         Ingredient* _ingredients[INGREDIENTS_NUM];
-        uint8_t _ingredientsQty[INGREDIENTS_NUM];
+        short _ingredientsQty[INGREDIENTS_NUM];
         bool _isAvaiable;
         
         bool addStep(char* info);
         bool addIngredient(Step step);
+        void calculateIngredientQty();
 
     public:
+        Recipe();
         Recipe(const char* dir, Warehouse* warehouse);
-
         bool checkIngredientsQty();
+
+
 
 };
