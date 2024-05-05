@@ -9,31 +9,33 @@
 
 class Ingredient {
 private:
-    char _name[NAME_LENGTH] {""};
-    int  _actuator=-1, _qty=0, _mqty=999;
+    char _name[NAME_LENGTH];
+    short  _actuator, _qty, _mqty, _adx;
     bool _isLiquid {false};
     bool _isEditable {false};
 
 public:
     Ingredient();
-    Ingredient(char *name, int actuator, int qty, int maxQty, bool isLiquid, bool isEditable);
+    Ingredient(char *name, short actuator, short qty, short maxQty, bool isLiquid, bool isEditable);
     Ingredient(char *allInfo);
 
     // Getter
     const char* getName() const;
-    int getQuantity() const;
-    int getMaxQuantity() const;
-    int getActuator() const;
+    short getQuantity() const;
+    short getMaxQuantity() const;
+    short getActuator() const;
+    short getAdx() const;
     bool isLiquid() const;
     bool isEditable() const;
 
     // Setter
     void setName(const char* name);
-    void setQuantity(int qty);
-    void setMaxQuantity(int maxQty);
+    void setQuantity(short qty);
+    void setMaxQuantity(short maxQty);
+    void setAdx(short adx);
     void setIsLiquid(bool isLiquid);
     void setIsEditable(bool isEditable);
-    void setActuator(int actuator);
+    void setActuator(short actuator);
 
     String print();
 };

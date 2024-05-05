@@ -3,14 +3,13 @@
 
 Warehouse::Warehouse(){
     PRINT_DBG(WAREHOUSE,"Checking where ingredients info are stored...");
-    EEPROM.begin(); uint8_t magic_number= EEPROM.read(0); EEPROM.end();
+    uint8_t magic_number= EEPROM.read(0);
     _storedIngredients=0;
     if (magic_number!=MAGIC_CHECK) readIngredientsFromEEPROM();
     else readIngredientsFromSD();
 }
 
 void Warehouse::readIngredientsFromEEPROM(){
-    EEPROM.begin();
     PRINT_DBG(WAREHOUSE, "Reading from EEPROM...");
     if (EEPROM.read(1)>NUM_INGREDIENTS){
         PRINT_DBG(WAREHOUSE, "Error: too many ingredients stored in EEPROM, increase the size of the ingredients array");
@@ -21,21 +20,18 @@ void Warehouse::readIngredientsFromEEPROM(){
         EEPROM.get(4+ i*sizeof(Ingredient), _ingredients[i]);
         PRINT_DBG(WAREHOUSE,String(i)+".\t"+_ingredients[i].print());
     }
-    EEPROM.end();
 }
 
 void Warehouse::readIngredientsFromSD(){
     PRINT_DBG(WAREHOUSE,"Reading ingredients from SD...");
 
     SdFat SD;
-    SD.begin(SD_SS); //REVIEW
-    //VELOCITY MAY BE IMPROVED, SEE DOCS
+    SD.begin(); //ev. sd_ss pin
     File file = SD.open(INGREDIENT_DIR);
     char buf[50];
     int n;
-    bool thereIsSpace;
 
-    while (file.available() && thereIsSpace){
+    while (file.available() && _storedIngredients<NUM_INGREDIENTS){
         n = file.fgets(buf, sizeof(buf)); //read a line
 
         if (buf[n - 1] != '\n' && n == (sizeof(buf) - 1)) {
@@ -44,15 +40,12 @@ void Warehouse::readIngredientsFromSD(){
             SD.end();
             while(true);
         } else {
-            thereIsSpace=addIngredient(buf);
+            addIngredient(buf);
         }
     }
 
-    EEPROM.begin();
-
     if (sizeof(Ingredient)*_storedIngredients+4 > EEPROM.length()){
         PRINT_DBG(WAREHOUSE, "Error: too many ingredients to store in eeprom.");
-        EEPROM.end();
         return;
     }
 
@@ -60,11 +53,11 @@ void Warehouse::readIngredientsFromSD(){
     EEPROM.write(1, _storedIngredients);
 
     for (uint8_t i=0; i<_storedIngredients; i++){
-        EEPROM.put(4+ i*sizeof(Ingredient), _ingredients[i]);
+        _ingredients[i].setAdx(4+ i*sizeof(Ingredient));
+        EEPROM.put(_ingredients[i].getAdx(), _ingredients[i]);
         PRINT_DBG(WAREHOUSE,String(i)+".\t"+_ingredients[i].print());
     }
 
-    EEPROM.end();
     file.close();
     SD.end();
 }

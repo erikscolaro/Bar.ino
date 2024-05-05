@@ -2,8 +2,9 @@
 
 Ingredient::Ingredient(){}
 
-Ingredient::Ingredient(char *name, int actuator, int qty, int maxQty, bool isLiquid, bool isEditable) : _actuator(actuator), _qty(qty), _mqty(maxQty), _isLiquid(isLiquid), _isEditable(isEditable)
+Ingredient::Ingredient(char *name, short actuator, short qty, short maxQty, bool isLiquid, bool isEditable) : _actuator(actuator), _qty(qty), _mqty(maxQty), _isLiquid(isLiquid), _isEditable(isEditable)
 {
+    _adx=0;
     if (name != nullptr) {
         setName(name);
     } else {
@@ -33,20 +34,25 @@ const char* Ingredient::getName() const {
     return _name;
 }
 
-int Ingredient::getActuator() const {
+short Ingredient::getActuator() const {
     return _actuator;
 }
 
-int Ingredient::getQuantity() const {
+short Ingredient::getQuantity() const {
     return _qty;
 }
 
-int Ingredient::getMaxQuantity() const {
+short Ingredient::getMaxQuantity() const {
     return _mqty;
 }
 
 bool Ingredient::isLiquid() const {
     return _isLiquid;
+}
+
+short Ingredient::getAdx() const
+{
+    return _adx;
 }
 
 bool Ingredient::isEditable() const {
@@ -59,20 +65,25 @@ void Ingredient::setName(const char* name) {
     _name[NAME_LENGTH - 1] = '\0';
 }
 
-void Ingredient::setActuator(int actuator) {
+void Ingredient::setActuator(short actuator) {
     _actuator=actuator;
 }
 
-void Ingredient::setQuantity(int qty) {
+void Ingredient::setQuantity(short qty) {
     _qty = qty;
 }
 
-void Ingredient::setMaxQuantity(int maxQty) {
+void Ingredient::setMaxQuantity(short maxQty) {
     _mqty = maxQty;
 }
 
 void Ingredient::setIsLiquid(bool isLiquid) {
     _isLiquid = isLiquid;
+}
+
+void Ingredient::setAdx(short adx)
+{
+    _adx=adx;
 }
 
 void Ingredient::setIsEditable(bool isEditable) {
