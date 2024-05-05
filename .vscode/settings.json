@@ -1,0 +1,5 @@
+{
+    "C_Cpp.default.compilerPath": "C:/Users/eriks/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+    "cmake.configureOnOpen": true,
+    "cmake.sourceDirectory": "C:/Users/eriks/OneDrive/Desktop/barino/.pio/libdeps/megaatmega2560/Unity"
+}
