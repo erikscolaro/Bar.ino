@@ -31,16 +31,19 @@ class Recipe {
         };
 
         char _name[RECIPE_NAME_LEN];
-        uint8_t _ingNum=0, _stepsNum=0;;
+        uint8_t _ingNum=0, _stepsNum=0;
+        Warehouse* _warehouse;
+        Step _steps[STEPS_NUM];
         Ingredient* _ingredients[INGREDIENTS_NUM];
         uint8_t _ingredientsQty[INGREDIENTS_NUM];
-        Step _steps[STEPS_NUM];
-        Warehouse* _warehouse;
-
+        bool _isAvaiable;
+        
         bool addStep(char* info);
         bool addIngredient(Step step);
 
     public:
         Recipe(const char* dir, Warehouse* warehouse);
+
+        bool checkIngredientsQty();
 
 };

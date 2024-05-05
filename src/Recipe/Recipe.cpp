@@ -24,6 +24,17 @@ Recipe::Recipe(const char *dir, Warehouse* warehouse):_warehouse(warehouse){
 
     file.close();
     SD.end();
+
+    _isAvaiable = checkIngredientsQty();
+}
+
+bool Recipe::checkIngredientsQty()
+{
+    for(int i=0; i<_ingNum; i++){
+        if (_ingredients[i]->isEditable() && _ingredients[i]->getQuantity()<_ingredientsQty[i]) return false;
+    }
+
+    return true;
 }
 
 bool Recipe::addStep(char *info){

@@ -2,7 +2,7 @@
 
 Ingredient::Ingredient(){}
 
-Ingredient::Ingredient(char *name, short actuator, short qty, short maxQty, bool isLiquid, bool isEditable) : _actuator(actuator), _qty(qty), _mqty(maxQty), _isLiquid(isLiquid), _isEditable(isEditable)
+Ingredient::Ingredient(const char *name, short actuator, short qty, short maxQty, bool isLiquid, bool isEditable) : _actuator(actuator), _qty(qty), _mqty(maxQty), _isLiquid(isLiquid), _isEditable(isEditable)
 {
     _adx=0;
     if (name != nullptr) {
@@ -16,7 +16,7 @@ Ingredient::Ingredient(char *name, short actuator, short qty, short maxQty, bool
 //name,index,quantity, max quantity, isliquid, iseditable
 Ingredient::Ingredient(char *line){
     char *token = strtok(line, DELIMITER_CHAR);
-    this->setName(line);
+    this->setName(token);
     token = strtok(nullptr, DELIMITER_CHAR);
     this->_actuator=strtol(token, nullptr, 10);
     token = strtok(nullptr, DELIMITER_CHAR);
@@ -27,6 +27,7 @@ Ingredient::Ingredient(char *line){
     this->_isLiquid=strtol(token, nullptr, 10)!=0;
     token = strtok(nullptr, DELIMITER_CHAR);
     this->_isEditable=strtol(token, nullptr, 10)!=0;
+    _adx=0;
 }
 
 // Getter

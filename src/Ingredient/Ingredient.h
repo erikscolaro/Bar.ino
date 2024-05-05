@@ -16,7 +16,7 @@ private:
 
 public:
     Ingredient();
-    Ingredient(char *name, short actuator, short qty, short maxQty, bool isLiquid, bool isEditable);
+    Ingredient(const char *name, short actuator, short qty, short maxQty, bool isLiquid, bool isEditable);
     Ingredient(char *allInfo);
 
     // Getter

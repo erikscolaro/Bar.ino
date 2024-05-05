@@ -9,6 +9,17 @@ Warehouse::Warehouse(){
     else readIngredientsFromSD();
 }
 
+Ingredient* Warehouse::getIngredient(const char *name)
+{
+    for (int i=0;i<_storedIngredients; i++){
+        if (strcmp(name, _ingredients[i].getName())==0){
+            return &_ingredients[i];
+        }
+    }
+
+    return nullptr;
+}
+
 void Warehouse::readIngredientsFromEEPROM(){
     PRINT_DBG(WAREHOUSE, "Reading from EEPROM...");
     if (EEPROM.read(1)>NUM_INGREDIENTS){
@@ -29,7 +40,7 @@ void Warehouse::readIngredientsFromSD(){
     SD.begin(); //ev. sd_ss pin
     File file = SD.open(INGREDIENT_DIR);
     char buf[50];
-    int n;
+    short n;
 
     while (file.available() && _storedIngredients<NUM_INGREDIENTS){
         n = file.fgets(buf, sizeof(buf)); //read a line
