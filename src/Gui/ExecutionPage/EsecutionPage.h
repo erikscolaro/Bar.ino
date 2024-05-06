@@ -1,10 +1,18 @@
-#include "Gui\Gui.h"
+#ifndef EXECUTIONPAGE_H
+#define EXECUTIONPAGE_H
 
-class ExecutionPage: public Gui{
+#ifndef Gui_h
+  #include "Gui/Gui.h"
+#endif
+
+class ExecutionPage{
     private: 
+        Gui* master;
     
     public:
         ExecutionPage();
 
         void showExecutingPage();
 };
+
+#endif; //EXECUTIONPAGE_H

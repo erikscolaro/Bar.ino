@@ -1,11 +1,10 @@
 #include <Arduino.h>
 
-#include "Warehouse/Warehouse.h"
-#include "Recipe/Recipe.h"
+#include "Gui/Gui.h"
 
 
 //global variables are stored in ram! remember that ...
-Warehouse magazzino = Warehouse();
+//Warehouse magazzino = Warehouse();
 
 
 void setup() {
@@ -14,11 +13,6 @@ void setup() {
 }
 
 void loop() {
-  Recipe ricetta= Recipe("", &magazzino);
-  if (ricetta.beginIteration()){
-    while (ricetta.nextStep()){
-      Serial.println(ricetta.getStepAction()+ricetta.getStepQty()+ricetta.getStepIngredient()->print());
-    }
-  }
-  
+  Gui interfaccia=Gui();
+  interfaccia.draw();
 }

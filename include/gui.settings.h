@@ -28,3 +28,7 @@
 #define CC 0xfd0f
 #define C 0xfed9
 #define C_BACK 0xffbe
+
+#define CUTOFF_COLOR 0xFFBF
+
+#define RECIPEBOOK_LEN 32

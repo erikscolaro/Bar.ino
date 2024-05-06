@@ -9,31 +9,23 @@ Recipe::Iterator::Iterator(uint8_t maxIndex):_index(0), _maxIndex(maxIndex)
 Recipe::Recipe(){
 }
 
-Recipe::Recipe(const char *dir, Warehouse *warehouse) : _warehouse(warehouse)
+Recipe::Recipe(File* file, Warehouse *warehouse) : _warehouse(warehouse)
 {
-    SdFat SD;
-    SD.begin(SD_SS);
-    File file=SD.open(dir);
-
     char buf[50];
     int n;
 
-    while (file.available() && _stepsNum<=STEPS_NUM && _ingNum<=INGREDIENTS_NUM){
-        n = file.fgets(buf, sizeof(buf));
+    while (file->available() && _stepsNum<=STEPS_NUM && _ingNum<=INGREDIENTS_NUM){
+        n = file->fgets(buf, sizeof(buf));
 
         if (buf[n - 1] != '\n' && n == (sizeof(buf) - 1)) {
             PRINT_DBG(RECIPE, "ERROR: line of csv recipe file is too long!")
-            file.close();
-            SD.end();
-            while(true);
+            file->close();
+            return;
         } else {
             addStep(buf);
             if (_steps[_stepsNum-1].getAction()==ADD) addIngredient(_steps[_stepsNum-1]);
         }
     }
-
-    file.close();
-    SD.end();
 
     calculateIngredientQty();
     _isAvaiable = checkIngredientsQty();

@@ -1,9 +1,16 @@
-#include "Gui\Gui.h"
+#ifndef SETTINGSPAGE_H
+#define SETTINGSPAGE_H
 
-class SettingsPage: public Gui{
+#ifndef Gui_h
+  #include "Gui/Gui.h"
+#endif
+
+class SettingsPage{
     private: 
     
     public:
         SettingsPage();
         void showSettingsPage();
 };
+
+#endif; //SETTINGSPAGE_H

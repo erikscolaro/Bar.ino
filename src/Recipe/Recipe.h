@@ -63,7 +63,7 @@ class Recipe {
 
     public:
         Recipe();
-        Recipe(const char* dir, Warehouse* warehouse);
+        Recipe(File* recipeFile, Warehouse* warehouse);
         
         const char* getName() const;
         short getStepsNum() const;

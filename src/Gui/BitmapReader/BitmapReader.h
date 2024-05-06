@@ -7,9 +7,14 @@ class BitmapReader{
     public:
         BitmapReader();
         BitmapReader(File* bmp);
+        bool readRow(uint16_t *buf);
 
-        void readBmp();
-
+        uint32_t getFileSize() const;
+        uint32_t getImageDataOffset() const;
+        uint32_t getWidth() const;
+        uint32_t getHeight() const;
+        uint16_t getBitsPerPixel() const;
+        File* getBmp();
 
     private:
         uint32_t _fileSize;
