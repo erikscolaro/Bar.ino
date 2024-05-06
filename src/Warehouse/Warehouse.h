@@ -9,7 +9,7 @@
 
 #include "warehouse.settings.h"
 #include "general.settings.h"
-#include "Ingredient\Ingredient.h"
+#include "Warehouse\Ingredient\Ingredient.h"
 
 
 

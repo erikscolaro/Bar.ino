@@ -2,7 +2,7 @@
 
 #include "recipe.settings.h"
 #include "general.settings.h"
-#include "Ingredient\Ingredient.h"
+#include "Warehouse\Ingredient\Ingredient.h"
 #include "Warehouse\Warehouse.h"
 
 #include "SdFat.h"
@@ -48,7 +48,8 @@ class Recipe {
             private:
                 uint8_t _index, _maxIndex;
             public:
-                Iterator(uint8_t maxIndex):_index(0), _maxIndex(maxIndex){}
+                Iterator();
+                Iterator(uint8_t maxIndex);
                 bool next(){_index++; return _index<_maxIndex;}
                 int index(){return _index;}
         };

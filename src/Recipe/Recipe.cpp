@@ -1,5 +1,11 @@
 #include "Recipe.h"
 
+Recipe::Iterator::Iterator():_index(0), _maxIndex(0){}
+
+Recipe::Iterator::Iterator(uint8_t maxIndex):_index(0), _maxIndex(maxIndex)
+{
+}
+
 Recipe::Recipe(){
 }
 
@@ -145,3 +151,5 @@ Ingredient *Recipe::Step::getIngredient()
 {
     return this->_ingredient;
 }
+
+
