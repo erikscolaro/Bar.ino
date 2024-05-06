@@ -36,10 +36,25 @@ Recipe::Recipe(const char *dir, Warehouse *warehouse) : _warehouse(warehouse)
 bool Recipe::checkIngredientsQty()
 {
     for(int i=0; i<_ingNum; i++){
-        if (_ingredients[i]->isEditable() && _ingredients[i]->getQuantity()<_ingredientsQty[i]) return false;
+        if (this->_warehouse->isEnough(_ingredients[i], _ingredientsQty[i])) return false;
     }
 
     return true;
+}
+
+const char *Recipe::getName() const
+{
+    return this->_name;
+}
+
+short Recipe::getStepsNum() const
+{
+    return this->_stepsNum;
+}
+
+bool Recipe::isAvailable() const
+{
+    return this->_isAvaiable;
 }
 
 bool Recipe::addStep(char *info){

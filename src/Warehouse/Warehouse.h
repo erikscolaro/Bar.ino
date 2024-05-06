@@ -21,6 +21,9 @@ class Warehouse{
         */
         Warehouse();
         Ingredient* getIngredient(const char* name);
+        bool isEnough(Ingredient* ingredient, short qty);
+        
+
 
     private:
         Ingredient _ingredients[NUM_INGREDIENTS];

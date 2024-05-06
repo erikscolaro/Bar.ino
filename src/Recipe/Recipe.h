@@ -43,12 +43,22 @@ class Recipe {
         bool addStep(char* info);
         bool addIngredient(Step step);
         void calculateIngredientQty();
+        bool checkIngredientsQty();
 
     public:
         Recipe();
         Recipe(const char* dir, Warehouse* warehouse);
-        bool checkIngredientsQty();
+        
+        const char* getName() const;
+        short getStepsNum() const;
+        bool isAvailable() const;
 
+        //TODO
+        const Ingredient* getIngredients() const;
+        short getIngredientsNum() const;
+        short getIngredientRequiredQty(const Ingredient* ingredient) const;
 
+        bool addIngredientQty(const Ingredient* ingredient, short qty);
+        bool adjusttotalVolume(short volume);
 
 };

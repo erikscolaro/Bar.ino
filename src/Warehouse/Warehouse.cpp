@@ -20,6 +20,11 @@ Ingredient* Warehouse::getIngredient(const char *name)
     return nullptr;
 }
 
+bool Warehouse::isEnough(Ingredient *ingredient, short qty)
+{
+    return ingredient->getQuantity()>=qty;
+}
+
 void Warehouse::readIngredientsFromEEPROM(){
     PRINT_DBG(WAREHOUSE, "Reading from EEPROM...");
     if (EEPROM.read(1)>NUM_INGREDIENTS){
