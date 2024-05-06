@@ -6,7 +6,7 @@
 
 //global variables are stored in ram! remember that ...
 Warehouse magazzino = Warehouse();
-Recipe ricetta= Recipe("", &magazzino);
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -14,5 +14,11 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  Recipe ricetta= Recipe("", &magazzino);
+  if (ricetta.beginIteration()){
+    while (ricetta.nextStep()){
+      Serial.println(ricetta.getStepAction()+ricetta.getStepQty()+ricetta.getStepIngredient()->print());
+    }
+  }
+  
 }
