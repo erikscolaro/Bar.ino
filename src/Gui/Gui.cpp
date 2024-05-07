@@ -142,4 +142,62 @@ Gui::Gui(){
 
     recipesFolder.close();
     SD.end();
+
+    _homepage=Homepage(this);
+    _drinkPage=DrinkPage(this);
+    _settingsPage=SettingsPage(this);
+    _executionPage=ExecutionPage(this);
+
+}
+
+Gui::Homepage::Homepage(Gui *gui)
+{
+}
+
+void Gui::Homepage::show()
+{
+}
+
+bool Gui::Homepage::interact(int xcc, int ycc)
+{
+    return false;
+}
+
+Gui::SettingsPage::SettingsPage(Gui *gui)
+{
+}
+
+void Gui::SettingsPage::show()
+{
+}
+
+bool Gui::SettingsPage::interact(int xcc, int ycc)
+{
+    return false;
+}
+
+Gui::ExecutionPage::ExecutionPage(Gui *gui)
+{
+}
+
+void Gui::ExecutionPage::show()
+{
+}
+
+bool Gui::ExecutionPage::interact(int xcc, int ycc)
+{
+    return false;
+}
+
+Gui::DrinkPage::DrinkPage(Gui *gui)
+{
+}
+
+void Gui::DrinkPage::show()
+{
+}
+
+bool Gui::DrinkPage::interact(int xcc, int ycc)
+{
+    return false;
 }

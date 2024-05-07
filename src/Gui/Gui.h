@@ -16,29 +16,86 @@
 #include "general.settings.h"
 #include "gui.settings.h"
 
-class test {
-private:
-    //soluzione al problema del gui: usare puntatori opachi?
-    void* _gui;
-    Adafruit_GFX_Button drinkButtons[TILE4COL * TILE4ROW];
-    Adafruit_GFX_Button navigationButtons[MAX_PAGES];
-    Adafruit_GFX_Button settingsButton;
-    uint8_t recipe_reference[TILE4COL * TILE4ROW];
-    uint8_t _pagei;
-    uint8_t _pagenum;
-
-public:
-    test(void* gui):_gui(gui){};
-    void showHomeNavigationBar();
-    void showHomeDrinkButtons();
-};
-
 class Gui{
     private:
+        class Homepage {
+            private:
+                Gui* _gui;
+                Adafruit_GFX_Button drinkButtons[TILE4PAGE];
+                Adafruit_GFX_Button navigationButtons[HOMEPAGE_MAX_PAGES];
+                Adafruit_GFX_Button settingsButton;
+                short _pagei;
+                short _pagenum;
+
+            public:
+                Homepage(){};
+                Homepage(Gui* gui);
+                void show();
+                bool interact(int xcc, int ycc);
+        };
+
+        class SettingsPage{
+            private: 
+                Gui* _gui;
+            
+            public:
+                SettingsPage(){};
+                SettingsPage(Gui* gui);
+                void show();
+                bool interact(int xcc, int ycc);
+        };
+
+        class ExecutionPage{
+            private: 
+                Gui* _gui;
+            
+            public:
+                ExecutionPage(){};
+                ExecutionPage(Gui* gui);
+                void show();
+                bool interact(int xcc, int ycc);
+        };
+
+        class DrinkPage{
+            private: 
+                Gui* _gui;
+                Adafruit_GFX_Button _back, _forward;
+                Adafruit_GFX_Button _small, _medium, _large;
+                Adafruit_GFX_Button _settings[SETTINGS_MAX_NUM][2];
+                uint8_t _settingsNum;
+                uint8_t _editIngrIdx[SETTINGS_MAX_NUM];
+            
+            public:
+                DrinkPage(){};
+                DrinkPage(Gui *gui);
+                void show();
+                bool interact(int xcc, int ycc);
+        };
+
+        //pages
+        Homepage _homepage;
+        SettingsPage _settingsPage;
+        ExecutionPage _executionPage;
+        DrinkPage _drinkPage;
+
+        //needed to manage page transition
+        typedef struct {
+            short _state;
+            short _previous;
+            bool _request;
+            Recipe* _selectedRecipe;
+        } uiStatus_t;
+
+        uiStatus_t uiStatus;
+
+        void checkInteration(int16_t x, int16_t y);  //da rimuovere
+        void changeState(int new_state);
+        void showErrorPage(char* error);    //da implementare come classe?
+
+        //transversal
         MCUFRIEND_kbv _tft;
-        Recipe _recipes[RECIPEBOOK_LEN];
         Warehouse _warehouse;
-        test tt=test(this);
+        Recipe _recipes[RECIPEBOOK_LEN];
         short _recipesLen;
 
         //general purpose functions
@@ -53,17 +110,10 @@ class Gui{
         void drawButtonVar(Adafruit_GFX_Button* button);
         uint16_t getStrHeight();
 
-        //non sono proprio sicuro, devo scegliere se deve essere una classe di utilità per la stampa o se avere anche altre funzioni
-        int _state;
-        int _previous_state;
-        bool _change_requested;
-        void checkInteration(int16_t x, int16_t y); 
-        void changeState(int new_state);
-        void showErrorPage(char* error);
-
     public:
         Gui();
 
-        void draw(){}; //da implementare per tutte le pagine figlie
+        void show();
+        bool interact(int xcc, int ycc);
 
 };

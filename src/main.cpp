@@ -14,5 +14,5 @@ void setup() {
 
 void loop() {
   Gui interfaccia=Gui();
-  interfaccia.draw();
+  interfaccia.show();
 }
