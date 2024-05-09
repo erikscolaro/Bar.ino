@@ -72,23 +72,12 @@ void Ingredient::setActuator(short actuator) {
 
 void Ingredient::setQuantity(short qty) {
     _qty = qty;
-}
-
-void Ingredient::setMaxQuantity(short maxQty) {
-    _mqty = maxQty;
-}
-
-void Ingredient::setIsLiquid(bool isLiquid) {
-    _isLiquid = isLiquid;
+    EEPROM.put(this->_adx, this);
 }
 
 void Ingredient::setAdx(short adx)
 {
     _adx=adx;
-}
-
-void Ingredient::setIsEditable(bool isEditable) {
-    _isEditable = isEditable;
 }
 
 String Ingredient::print() {
@@ -97,4 +86,27 @@ String Ingredient::print() {
                   (_isLiquid ? "is liquid" : "is not liquid") +
                   " and " +
                   (_isEditable ? "is editable" : "is not editable"));
+}
+
+bool Ingredient::subtractQuantity(short subQty)
+{
+    if (this->getQuantity()<subQty) return false;
+    else{
+        this->setQuantity(this->getQuantity()-subQty);
+        return true;
+    }
+}
+
+bool Ingredient::addQuantity(short addQty)
+{
+    if (this->getQuantity()+addQty>this->getMaxQuantity()) return false;
+    else{
+        this->setQuantity(this->getQuantity()+addQty);
+        return true;
+    }
+}
+
+void Ingredient::refillQty()
+{
+    setQuantity(this->getMaxQuantity());
 }

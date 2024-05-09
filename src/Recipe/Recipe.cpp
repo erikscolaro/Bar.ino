@@ -50,7 +50,7 @@ short Recipe::getStepsNum() const
     return this->_stepsNum;
 }
 
-bool Recipe::isAvailable() const
+bool Recipe::checkQtyInWarehouse() const
 {
     return this->_isAvaiable;
 }

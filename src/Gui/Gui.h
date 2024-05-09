@@ -10,7 +10,7 @@
 #include "Gui/BitmapReader/BitmapReader.h"
 
 //we need a new way to store pages, i can attempt a multiple class file
-//in order not to fragmentate too much the
+//in order not to fragmentate too much the file
 
 #include "Glyphs.h"
 #include "general.settings.h"

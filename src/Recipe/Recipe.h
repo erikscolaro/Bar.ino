@@ -67,16 +67,24 @@ class Recipe {
         
         const char* getName() const;
         short getStepsNum() const;
-        bool isAvailable() const;
 
         //TODO, per la visualizzazione e la modifica della ricetta 
-        const Ingredient* getIngredients() const;
         short getIngredientsNum() const;
+        Ingredient* getIngredients() const;
         short getIngredientRequiredQty(const Ingredient* ingredient) const;
 
+        //add or subtract qtys in drink setup page, than adjust volume and finally check if mod qtys
+        //are avaiable in warehouse
+        bool checkQtyInWarehouse() const;
         bool addIngredientQty(const Ingredient* ingredient, short qty);
         bool adjusttotalVolume(short volume);
+        
+        //who shold manage ingredients qty stored in eeprom?
+        //recipe iterator or the executer?
+        //maybe is more concectually correct the executer does.
 
+        
+        // questo iteratore si può fare meglio per ottenere il puntatore allo step
         //TODO, per l'esecuzione. tipo iteratore
         bool beginIteration(){_stepItr=Iterator(this->_stepsNum); return this->_stepsNum>0;};
         bool nextStep(){return _stepItr.next();};
