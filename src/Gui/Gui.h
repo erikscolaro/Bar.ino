@@ -62,11 +62,9 @@ class Gui{
         class DrinkPage{
             private: 
                 Gui* _gui;
-                Adafruit_GFX_Button _back, _forward;
-                Adafruit_GFX_Button _small, _medium, _large;
-                Adafruit_GFX_Button _settings[SETTINGS_MAX_NUM][2];
-                uint8_t _settingsNum;
-                uint8_t _editIngrIdx[SETTINGS_MAX_NUM];
+                Button _back, _forward;
+                Button _small, _medium, _large;
+                Button _settings[SETTINGS_MAX_NUM][2];
             
             public:
                 DrinkPage(){};
@@ -81,8 +79,7 @@ class Gui{
         ExecutionPage _executionPage;
         DrinkPage _drinkPage;
 
-        enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER};
-
+        enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER, ERROR, BEGIN};
         //needed to manage page transition
         typedef struct {
             State _actual;
@@ -93,24 +90,29 @@ class Gui{
 
         uiStatus_t uiStatus;
         void setSelectedRecipe(Recipe* selectedRecipe);
+        Recipe* getSelectedRecipe();
+
         void requestTransition(State newState);
-        void completedTransition();
+        bool requestedTransition();
+        void completeTransition();
+
         void requestRefresh();
-        void completedRefresh();
         bool requestedRefresh();
+        void completeRefresh();
 
         //request to the active page to check if there are interactions with its elements
         void checkInteration(int16_t x, int16_t y);
-        void showErrorPage(char* error);    //da implementare come classe?
+        void showError(char* error);    //da implementare come classe?
 
         //transversal
         MCUFRIEND_kbv _tft;
         Warehouse _warehouse;
         Recipe _recipes[RECIPEBOOK_LEN];
         short _recipesNum;
+        MCUFRIEND_kbv* getTftptr(){return &_tft;}
 
         //general purpose functions
-        void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, uint16_t char4line);
+        void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line);
         void showImageBL(const char* dir, int x, int y);
         void drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h ,uint16_t color,const uint16_t bitmap[]);
         void showTileOverlayUL(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t radius, const char* label, char* imageDir);
@@ -118,8 +120,9 @@ class Gui{
 
     public:
         Gui();
-
         void show();
         bool interact(int xcc, int ycc);
+        int screenWidth(){return _tft.width();}
+        int screenHeight(){return _tft.height();}
 
 };

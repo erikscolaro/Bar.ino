@@ -11,7 +11,8 @@ enum DbgLevel: bool {
     GUI = true,
     HOMEPAGE = true,
     DRINKPAGE = true,
-    SETTINGS = true
+    SETTINGS = true,
+    MAIN = true
 };
 
 #define PRINT_DBG(dbgLevel, message) if (dbgLevel) Serial.println(message); 
@@ -33,4 +34,4 @@ enum DbgLevel: bool {
 
 #define RECIPES_DIR "/res/recipes"
 
-#endif //GENERAL_SETTINGS_H
+#endif; //GENERAL_SETTINGS_H

@@ -40,6 +40,11 @@
 
 //********** Gui.drinkpage settings **********//
 #define SETTINGS_MAX_NUM 5
+enum DrinkCapacity: short {
+    SMALL = 50,
+    MEDIUM = 200,
+    LARGE = 400
+};
 
 //********** Gui.settings settings **********//
 

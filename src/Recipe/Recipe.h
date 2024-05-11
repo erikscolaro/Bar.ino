@@ -17,6 +17,7 @@ enum Action {
 
 class Recipe {
     private:
+
         class Step {
             public:
                 Step();
@@ -31,18 +32,6 @@ class Recipe {
                 short _modQty = -1;
                 Ingredient* _ingredient = nullptr;
         };
-
-
-        char _name[RECIPE_NAME_LEN];
-        Warehouse* _warehouse;
-        bool _isAvaiable;
-
-        //to manage data storage
-        uint8_t _ingNum=0, _stepsNum=0;
-        Step _steps[STEPS_NUM];
-        Ingredient* _ingredients[INGREDIENTS_NUM];
-        short _ingredientsQty[INGREDIENTS_NUM];
-
         //to manage iteration on steps
         class Iterator {
             private:
@@ -53,14 +42,21 @@ class Recipe {
                 bool next(){_index++; return _index<_maxIndex;}
                 int index(){return _index;}
         };
-
-        Iterator _stepItr;
         
+        char _name[RECIPE_NAME_LEN];
+        bool _isAvaiable;
+        Warehouse* _warehouse;
+        Step _steps[STEPS_NUM];
+        Iterator _stepItr;
+        Ingredient* _ingredients[INGREDIENTS_NUM];
+        short _ingredientsQty[INGREDIENTS_NUM];
+        uint8_t _ingNum=0, _stepsNum=0;
+
         bool addStep(char* info);
         bool addIngredient(Step step);
         void calculateIngredientQty();
         bool checkIngredientsQty();
-
+        
     public:
         Recipe();
         Recipe(File* recipeFile, Warehouse* warehouse);
@@ -69,23 +65,17 @@ class Recipe {
         short getStepsNum() const;
 
         //TODO, per la visualizzazione e la modifica della ricetta 
-        short getIngredientsNum() const;
-        Ingredient* getIngredients() const;
-        short getIngredientRequiredQty(const Ingredient* ingredient) const;
+        short getIngredientsNum() const {return _ingNum;}
+        Ingredient* const* getIngredients() const {return _ingredients;}
+        short getIngredientRequiredQty(Ingredient* ingredient) const;
 
         //add or subtract qtys in drink setup page, than adjust volume and finally check if mod qtys
         //are avaiable in warehouse
         bool checkQtyInWarehouse() const;
         bool addIngredientQty(const Ingredient* ingredient, short qty);
-        bool adjusttotalVolume(short volume);
+        void adjustTotalVolume(short volume);
         
-        //who shold manage ingredients qty stored in eeprom?
-        //recipe iterator or the executer?
-        //maybe is more concectually correct the executer does.
-
-        
-        // questo iteratore si può fare meglio per ottenere il puntatore allo step
-        //TODO, per l'esecuzione. tipo iteratore
+        //fake iterator
         bool beginIteration(){_stepItr=Iterator(this->_stepsNum); return this->_stepsNum>0;};
         bool nextStep(){return _stepItr.next();};
         Action getStepAction(){return _steps[_stepItr.index()].getAction();};
