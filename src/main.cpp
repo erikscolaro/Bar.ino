@@ -51,7 +51,10 @@ void setup() {
 void loop() {
   Gui interfaccia=Gui();
   interfaccia.show();
-  while (!getXY(&interfaccia));
-  interfaccia.interact(cc.mapped_x, cc.mapped_y);
-  delay(5000);
+  while (true){
+    if (getXY(&interfaccia)){
+      interfaccia.interact(cc.mapped_x, cc.mapped_y);
+    }
+    delay(10);
+  }
 }

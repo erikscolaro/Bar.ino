@@ -25,6 +25,7 @@ class Recipe {
                 Action getAction();
                 short getQty();
                 short getModQty();
+                void addModQty(short qty);
                 Ingredient* getIngredient();
             private:
                 Action _action = SKIP;
@@ -35,7 +36,7 @@ class Recipe {
         //to manage iteration on steps
         class Iterator {
             private:
-                uint8_t _index, _maxIndex;
+                int8_t _index, _maxIndex;
             public:
                 Iterator();
                 Iterator(uint8_t maxIndex);
@@ -76,9 +77,9 @@ class Recipe {
         void adjustTotalVolume(short volume);
         
         //fake iterator
-        bool beginIteration(){_stepItr=Iterator(this->_stepsNum); return this->_stepsNum>0;};
-        bool nextStep(){return _stepItr.next();};
-        Action getStepAction(){return _steps[_stepItr.index()].getAction();};
-        short getStepQty(){return _steps[_stepItr.index()].getModQty();};
-        Ingredient* getStepIngredient(){return _steps[_stepItr.index()].getIngredient();};
+        bool beginIteration(){_stepItr=Iterator(this->_stepsNum); return this->_stepsNum>0;}
+        bool nextStep(){return _stepItr.next();}
+        Action getStepAction(){return _steps[_stepItr.index()].getAction();}
+        short getStepQty(){return _steps[_stepItr.index()].getModQty();}
+        Ingredient* getStepIngredient(){return _steps[_stepItr.index()].getIngredient();}
 };

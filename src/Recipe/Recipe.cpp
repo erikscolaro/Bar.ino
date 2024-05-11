@@ -2,7 +2,7 @@
 
 Recipe::Iterator::Iterator():_index(0), _maxIndex(0){}
 
-Recipe::Iterator::Iterator(uint8_t maxIndex):_index(0), _maxIndex(maxIndex)
+Recipe::Iterator::Iterator(uint8_t maxIndex):_index(-1), _maxIndex(maxIndex)
 {
 }
 
@@ -53,6 +53,21 @@ short Recipe::getStepsNum() const
 bool Recipe::checkQtyInWarehouse() const
 {
     return this->_isAvaiable;
+}
+
+bool Recipe::addIngredientQty(const Ingredient *ingredient, short qty)
+{
+    for (int i=0; i<_stepsNum; i++){
+        if (_steps[i].getIngredient()==ingredient){
+            _steps[i].addModQty(qty);
+            return true;
+        }
+    }
+    return false;
+}
+
+void Recipe::adjustTotalVolume(short volume)
+{
 }
 
 bool Recipe::addStep(char *info){
@@ -137,6 +152,11 @@ short Recipe::Step::getQty()
 short Recipe::Step::getModQty()
 {
     return this->_modQty;
+}
+
+void Recipe::Step::addModQty(short qty)
+{
+    _modQty+=qty;
 }
 
 Ingredient *Recipe::Step::getIngredient()

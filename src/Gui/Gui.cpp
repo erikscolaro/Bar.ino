@@ -151,7 +151,7 @@ Gui::Gui(){
         _recipes[_recipesNum]=Recipe(&activeRecipe, &_warehouse);
         activeRecipe.close();
         _recipesNum+=1;
-  }
+    }
 
     recipesFolder.close();
     SD.end();
@@ -517,9 +517,7 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
         if (selRecipe->checkQtyInWarehouse()){
             _gui->requestTransition(STATE_EXECUTER);
         } else {
-            _gui->showError("Errore: non ci sono sufficienti ingredienti. Prova a modificare qualcosa o cambia cocktail.");
-            _gui->requestTransition(ERROR);
-            _gui->requestTransition(STATE_DRINK);
+            _gui->showPopup("Errore: non ci sono sufficienti ingredienti. Prova a modificare qualcosa o cambia cocktail.");
         }
         return true;
     } else if (_small.contains(xcc,ycc)){
@@ -594,6 +592,18 @@ void Gui::requestRefresh()
 void Gui::completeRefresh()
 {
     uiStatus._refreshReq=false;
+}
+
+void Gui::showPopup(char *error)
+{
+    _tft.fillRoundRect(20, _tft.height()/5*2, _tft.height()-40, _tft.height()/5, 20, CCCC);
+    _tft.drawRoundRect(20, _tft.height()/5*2, _tft.height()-40, _tft.height()/5, 20, CCCC);
+    _tft.setCursor(20, _tft.height()/2);
+    _tft.print(error);
+    delay(2000);
+
+    uiStatus._next=uiStatus._actual;
+    uiStatus._actual=ERROR;
 }
 
 bool Gui::requestedRefresh()

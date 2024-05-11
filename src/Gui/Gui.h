@@ -102,7 +102,7 @@ class Gui{
 
         //request to the active page to check if there are interactions with its elements
         void checkInteration(int16_t x, int16_t y);
-        void showError(char* error);    //da implementare come classe?
+        void showPopup(char* error);    //da implementare come classe?
 
         //transversal
         MCUFRIEND_kbv _tft;
