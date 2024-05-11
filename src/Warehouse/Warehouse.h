@@ -11,8 +11,6 @@
 #include "general.settings.h"
 #include "Warehouse\Ingredient\Ingredient.h"
 
-
-
 class Warehouse{
     public:
 
@@ -21,9 +19,9 @@ class Warehouse{
         */
         Warehouse();
         Ingredient* getIngredient(const char* name);
+        Ingredient* getIngredient(int index) const;
         bool isEnough(Ingredient* ingredient, short qty);
-        
-
+        int getIngredientsNumber(){return _storedIngredients;}
 
     private:
         Ingredient _ingredients[NUM_INGREDIENTS];

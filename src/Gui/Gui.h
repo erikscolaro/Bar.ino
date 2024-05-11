@@ -8,6 +8,7 @@
 #include "Recipe/Recipe.h"
 #include "Warehouse/Warehouse.h"
 #include "Gui/BitmapReader/BitmapReader.h"
+#include "Gui/Button/Button.h"
 
 //we need a new way to store pages, i can attempt a multiple class file
 //in order not to fragmentate too much the file
@@ -21,11 +22,13 @@ class Gui{
         class Homepage {
             private:
                 Gui* _gui;
-                Adafruit_GFX_Button drinkButtons[TILE4PAGE];
-                Adafruit_GFX_Button navigationButtons[HOMEPAGE_MAX_PAGES];
-                Adafruit_GFX_Button settingsButton;
+                Button drinkButtons[HOMEPAGE_MAX_PAGES][TILE4PAGE];
+                Button navigationButtons[HOMEPAGE_MAX_PAGES];
+                Button settingsButton;
                 short _pagei;
                 short _pagenum;
+                char numToStr[9][2] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
 
             public:
                 Homepage(){};
@@ -78,36 +81,39 @@ class Gui{
         ExecutionPage _executionPage;
         DrinkPage _drinkPage;
 
+        enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER};
+
         //needed to manage page transition
         typedef struct {
-            short _state;
-            short _previous;
-            bool _request;
+            State _actual;
+            State _next;
             Recipe* _selectedRecipe;
+            bool _refreshReq;
         } uiStatus_t;
 
         uiStatus_t uiStatus;
+        void setSelectedRecipe(Recipe* selectedRecipe);
+        void requestTransition(State newState);
+        void completedTransition();
+        void requestRefresh();
+        void completedRefresh();
+        bool requestedRefresh();
 
-        void checkInteration(int16_t x, int16_t y);  //da rimuovere
-        void changeState(int new_state);
+        //request to the active page to check if there are interactions with its elements
+        void checkInteration(int16_t x, int16_t y);
         void showErrorPage(char* error);    //da implementare come classe?
 
         //transversal
         MCUFRIEND_kbv _tft;
         Warehouse _warehouse;
         Recipe _recipes[RECIPEBOOK_LEN];
-        short _recipesLen;
+        short _recipesNum;
 
         //general purpose functions
         void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, uint16_t char4line);
         void showImageBL(const char* dir, int x, int y);
-        void showTileUL(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t radius, Ingredient* ingredient, Adafruit_GFX_Button* tile);
-        void initButtonVarUL(Adafruit_GFX_Button* button, int16_t x1,
-                                       int16_t y1, uint16_t w, uint16_t h,
-                                       uint16_t outline, uint16_t fill,
-                                       uint16_t textcolor, char *label,
-                                       uint8_t textsize_x, uint8_t textsize_y, uint16_t radius);
-        void drawButtonVar(Adafruit_GFX_Button* button);
+        void drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h ,uint16_t color,const uint16_t bitmap[]);
+        void showTileOverlayUL(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t radius, const char* label, char* imageDir);
         uint16_t getStrHeight();
 
     public:

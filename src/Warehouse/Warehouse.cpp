@@ -20,6 +20,13 @@ Ingredient* Warehouse::getIngredient(const char *name)
     return nullptr;
 }
 
+Ingredient *Warehouse::getIngredient(int index) const
+{
+    if (index>=_storedIngredients) return nullptr;
+
+    return const_cast<Ingredient*>(&_ingredients[index]);
+}
+
 bool Warehouse::isEnough(Ingredient *ingredient, short qty)
 {
     return ingredient->getQuantity()>=qty;

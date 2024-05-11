@@ -1,6 +1,7 @@
 //********** Gui settings **********//
 
 #define RECIPEBOOK_LEN 32
+#define BUF_LEN 50
 
 //  Touchscreen settings
 #define MILLIS_CHECK_TOUCH 200 //in milliseconds
