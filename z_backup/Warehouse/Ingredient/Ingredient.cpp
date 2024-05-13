@@ -85,8 +85,7 @@ String Ingredient::print() {
                   "Quantità rimasta: " + String(_qty) + "/" + String(_mqty) + "\t" +
                   (_isLiquid ? "is liquid" : "is not liquid") +
                   " and " +
-                  (_isEditable ? "is editable" : "is not editable") +
-                  " Indirizzo: "+String(this->_adx));
+                  (_isEditable ? "is editable" : "is not editable"));
 }
 
 bool Ingredient::subtractQuantity(short subQty)
@@ -94,9 +93,6 @@ bool Ingredient::subtractQuantity(short subQty)
     if (this->getQuantity()<subQty) return false;
     else{
         this->setQuantity(this->getQuantity()-subQty);
-        if (this->_adx!=0){
-            EEPROM.put(this->_adx, *this);
-        }
         return true;
     }
 }
@@ -106,9 +102,6 @@ bool Ingredient::addQuantity(short addQty)
     if (this->getQuantity()+addQty>this->getMaxQuantity()) return false;
     else{
         this->setQuantity(this->getQuantity()+addQty);
-        if (this->_adx!=0){
-            EEPROM.begin(); EEPROM.put(this->_adx, this); EEPROM.end();
-        }
         return true;
     }
 }
@@ -116,7 +109,4 @@ bool Ingredient::addQuantity(short addQty)
 void Ingredient::refillQty()
 {
     setQuantity(this->getMaxQuantity());
-    if (this->_adx!=0){
-            EEPROM.begin(); EEPROM.put(this->_adx, this); EEPROM.end();
-        }
 }

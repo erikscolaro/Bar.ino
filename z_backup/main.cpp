@@ -42,19 +42,12 @@ void setup() {
   if (i==5){ Serial.println("HOHO...SD card not recognized! FATAL ERROR"); while(true);}
 
   Serial.println("SD READY.");
-  SD.end();
 
 }
 
 void loop() {
-  //Gui interfaccia=Gui();
-  Warehouse gioco = Warehouse();
-  Serial.println("test accesso per indice");
-  Ingredient* malibu = gioco.getIngredient(1);
-  Serial.println(String(malibu->print()));
-  malibu->subtractQuantity(137);
-  Serial.println(String(malibu->print()));
-  while (true){delay(10);}
+  Gui interfaccia=Gui();
+  while (true){Serial.println("TIOcANATO");}
 /*   Gui interfaccia=Gui();
   Serial.println("GUI READY.");
   interfaccia.show();

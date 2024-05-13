@@ -1,6 +1,4 @@
-Drink Fittizzio 2
-4
-A	APEROL	60
-A	PROSECCO	90
-A	SODA	30
-M
+A,aperol,60
+A,prosecco,90
+A,soda,30
+M,-1,-1

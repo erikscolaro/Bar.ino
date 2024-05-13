@@ -5,8 +5,7 @@ Warehouse::Warehouse(){
     Serial.println("[WAREHOUSE]Checking where ingredients info are stored...");
     uint8_t magic_number= EEPROM.read(0);
     _storedIngredients=0;
-    Serial.println("Numero salvato in eeprom:"+ String(magic_number) + "  Numero magico:" + String(MAGIC_CHECK));
-    if (magic_number==MAGIC_CHECK) readIngredientsFromEEPROM();
+    if (magic_number!=MAGIC_CHECK) readIngredientsFromEEPROM();
     else readIngredientsFromSD();
 }
 
@@ -50,16 +49,12 @@ void Warehouse::readIngredientsFromSD(){
     Serial.println("[WAREHOUSE]Reading ingredients from SD...");
 
     SdFat SD;
-    SD.begin();
+    SD.begin(); //ev. sd_ss pin
     File file = SD.open(INGREDIENT_DIR);
-    char buf[50], buf2[50];
+    char buf[50];
     short n;
-    int filePos;
 
     while (file.available() && _storedIngredients<NUM_INGREDIENTS){
-        memset(buf, 0, sizeof(buf));
-        memset(buf2, 0, sizeof(buf2));
-        filePos=file.position();
         n = file.fgets(buf, sizeof(buf)); //read a line
 
         if (buf[n - 1] != '\n' && n == (sizeof(buf) - 1)) {
@@ -68,18 +63,6 @@ void Warehouse::readIngredientsFromSD(){
             SD.end();
             while(true);
         } else {
-            file.seek(filePos);
-            file.fgets(buf2, sizeof(buf2));
-            while (memcmp(buf, buf2, sizeof(buf))!=0){
-                Serial.println("[WAREHOUSE]WARNING: inconsistency in reading data from sd.");
-                Serial.println(String(buf)+"\n"+String(buf2));
-                memset(buf, 0, sizeof(buf));
-                memset(buf2, 0, sizeof(buf2));
-                file.seek(filePos);
-                file.fgets(buf, sizeof(buf));
-                file.seek(filePos);
-                file.fgets(buf2, sizeof(buf2));
-            }
             addIngredient(buf);
         }
     }
@@ -98,8 +81,8 @@ void Warehouse::readIngredientsFromSD(){
         Serial.println("[WAREHOUSE]"+String(i)+".\t"+_ingredients[i].print());
     }
 
-    SD.end();
     file.close();
+    SD.end();
 }
 
 bool Warehouse::addIngredient(char *info){

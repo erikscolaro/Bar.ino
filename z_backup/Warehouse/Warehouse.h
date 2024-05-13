@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 
 #include "SdFat.h"
+#include "SdFatConfig.h"
 
 #include "warehouse.settings.h"
 #include "general.settings.h"

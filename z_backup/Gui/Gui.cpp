@@ -137,7 +137,10 @@ Gui::Gui(){
 
     _recipesNum=0;
 
+    //warehouse construtor implicitly invoked before gui class construction
+
     SdFat SD;
+    SD.begin();
 
     File recipesFolder=SD.open(RECIPES_DIR);
     File activeRecipe;
@@ -151,6 +154,7 @@ Gui::Gui(){
     }
 
     recipesFolder.close();
+    SD.end();
 
     _homepage=Homepage(this);
     _drinkPage=DrinkPage(this);
@@ -160,6 +164,7 @@ Gui::Gui(){
     uiStatus._actual=BEGIN;
     uiStatus._next=BEGIN;
     requestRefresh();
+    
 }
 
 void Gui::show()

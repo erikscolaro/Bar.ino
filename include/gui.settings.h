@@ -1,3 +1,6 @@
+#ifndef GUI_SETTINGS_H
+#define GUI_SETTINGS_H
+
 //********** Gui settings **********//
 
 #define RECIPEBOOK_LEN 32
@@ -50,3 +53,5 @@ enum DrinkCapacity: short {
 
 
 //********** Gui.executer settings **********//
+
+#endif 

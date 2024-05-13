@@ -52,9 +52,20 @@ void loop() {
   Serial.println("test accesso per indice");
   Ingredient* malibu = gioco.getIngredient(1);
   Serial.println(String(malibu->print()));
+  Serial.println("test accesso per nome");
+  malibu = gioco.getIngredient("gin");
+  if (malibu==nullptr) Serial.println("nullpointer returned");
+  Serial.println(String(malibu->print()));
+  Serial.println("test metodi della classe ingredient");
   malibu->subtractQuantity(137);
   Serial.println(String(malibu->print()));
-  while (true){delay(10);}
+  malibu->refillQty();
+  Serial.println(String(malibu->print()));
+  malibu->subtractQuantity(9999);
+  Serial.println(String(malibu->print()));
+  malibu->addQuantity(9999);
+  Serial.println(String(malibu->print()));
+  while (true){}
 /*   Gui interfaccia=Gui();
   Serial.println("GUI READY.");
   interfaccia.show();
