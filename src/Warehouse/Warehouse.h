@@ -19,7 +19,7 @@ class Warehouse{
         Warehouse();
         Ingredient* getIngredient(const char* name);
         Ingredient* getIngredient(int index) const;
-        bool isEnough(Ingredient* ingredient, short qty);
+        bool isEnough(Ingredient const* ingredient, short qty);
         int getIngredientsNumber(){return _storedIngredients;}
 
     private:

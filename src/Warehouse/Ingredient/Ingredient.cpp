@@ -107,7 +107,7 @@ bool Ingredient::addQuantity(short addQty)
     else{
         this->setQuantity(this->getQuantity()+addQty);
         if (this->_adx!=0){
-            EEPROM.begin(); EEPROM.put(this->_adx, this); EEPROM.end();
+            EEPROM.begin(); EEPROM.put(this->_adx, *this); EEPROM.end();
         }
         return true;
     }
@@ -117,6 +117,6 @@ void Ingredient::refillQty()
 {
     setQuantity(this->getMaxQuantity());
     if (this->_adx!=0){
-            EEPROM.begin(); EEPROM.put(this->_adx, this); EEPROM.end();
+            EEPROM.begin(); EEPROM.put(this->_adx, *this); EEPROM.end();
         }
 }

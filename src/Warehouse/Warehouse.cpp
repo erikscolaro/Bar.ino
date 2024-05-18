@@ -28,7 +28,7 @@ Ingredient *Warehouse::getIngredient(int index) const
     return const_cast<Ingredient*>(&_ingredients[index]);
 }
 
-bool Warehouse::isEnough(Ingredient *ingredient, short qty)
+bool Warehouse::isEnough(Ingredient const *ingredient, short qty)
 {
     return ingredient->getQuantity()>=qty;
 }

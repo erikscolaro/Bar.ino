@@ -46,14 +46,48 @@ void setup() {
 
 }
 
+void print(String text){
+  Serial.println(text);
+}
+
+void printRecipe(Recipe *r){
+  String nome = String(r->getName());
+  print("Nome ricetta: "+ String(nome));
+  print("Passaggi:");
+  r->iteratorBegin();
+  while (r->iteratorNext()){
+    print("Azione: " + String((char) r->iteratorGetAction())+ "  Quantità: " + String(r->iteratorGetQty())+ "  " + r->iteratorGetIngredient()->print());
+  }
+}
+
 void loop() {
-  //Gui interfaccia=Gui();
-  Warehouse gioco = Warehouse();
-  Serial.println("test accesso per indice");
-  Ingredient* malibu = gioco.getIngredient(1);
-  Serial.println(String(malibu->print()));
-  malibu->subtractQuantity(137);
-  Serial.println(String(malibu->print()));
+  Warehouse warehouse = Warehouse();
+  SdFat SD;
+  SD.begin(SD_SS, SD_SCK_MHZ(16));
+  File file; file  = SD.open("recipes/Bellini.csv");
+  Recipe r = Recipe(&file, &warehouse);
+  Ingredient *prosecco = warehouse.getIngredient("prosecco");
+
+  //to debug
+
+  printRecipe(&r);
+  Serial.println("Aggiungo 100 ml di prosecco");
+  Serial.println( "check sulla memorizzazione del valore"+ String(r.addIngredientQty(prosecco, 100)));
+  printRecipe(&r);
+  Serial.println("Ci sono abbastanza ingredienti?:" + String(r.checkEnoughIngredientsInWarehouse()));
+  Serial.println("aggiusto il volume..");
+  r.adjustTotalVolume(100);
+  r.checkEnoughIngredientsInWarehouse();
+  printRecipe(&r);
+  
+  Serial.println("testo l'accesso mediante lista di ingredienti");
+  Ingredient* const* ingredienti = r.getIngredients();
+  for (int i=0; i<r.getIngredientsNum(); i++){
+    Serial.println(ingredienti[i]->print());
+    Serial.println("quantità totale richiesta: "+String(r.getIngredientRequiredQty(ingredienti[i])));
+
+  }
+
   while (true){delay(10);}
 /*   Gui interfaccia=Gui();
   Serial.println("GUI READY.");

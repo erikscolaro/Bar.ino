@@ -1,12 +1,5 @@
 #include "Recipe.h"
 
-
-Recipe::Iterator::Iterator():_index(0), _maxIndex(0){}
-
-Recipe::Iterator::Iterator(uint8_t maxIndex):_index(-1), _maxIndex(maxIndex)
-{
-}
-
 Recipe::Recipe(){
 }
 
@@ -14,6 +7,11 @@ Recipe::Recipe(File* file, Warehouse *warehouse) : _warehouse(warehouse)
 {
     char buf[50];
     int n;
+
+    //remote .extension in name
+    file->getName(this->_name, sizeof(this->_name));
+    char* dotptr = strchr(this->_name, '.');
+    if (dotptr!=nullptr) *dotptr = '\0';
 
     while (file->available() && _stepsNum<=STEPS_NUM && _ingNum<=INGREDIENTS_NUM){
         n = file->fgets(buf, sizeof(buf));
@@ -29,16 +27,7 @@ Recipe::Recipe(File* file, Warehouse *warehouse) : _warehouse(warehouse)
     }
 
     calculateIngredientQty();
-    _isAvaiable = checkIngredientsQty();
-}
-
-bool Recipe::checkIngredientsQty()
-{
-    for(int i=0; i<_ingNum; i++){
-        if (this->_warehouse->isEnough(_ingredients[i], _ingredientsQty[i])) return false;
-    }
-
-    return true;
+    checkEnoughIngredientsInWarehouse();
 }
 
 const char *Recipe::getName() const
@@ -59,17 +48,14 @@ short Recipe::getIngredientRequiredQty(Ingredient *ingredient) const
     return 0;
 }
 
-bool Recipe::checkQtyInWarehouse() const
-{
-    return this->_isAvaiable;
-}
-
 bool Recipe::addIngredientQty(const Ingredient *ingredient, short qty)
 {
     for (int i=0; i<_stepsNum; i++){
         if (_steps[i].getIngredient()==ingredient){
-            _steps[i].addModQty(qty);
-            return true;
+            if (_warehouse->isEnough(ingredient, _steps[i].getModQty()+qty)){
+                _steps[i].addModQty(qty);
+                return true;
+            } else return false;
         }
     }
     return false;
@@ -77,17 +63,38 @@ bool Recipe::addIngredientQty(const Ingredient *ingredient, short qty)
 
 void Recipe::adjustTotalVolume(short volume)
 {
-    short vv=0;
+    float vv=0;
     for (int i=0; i<_ingNum; i++){
         vv+=_ingredientsQty[i];
     }
+
+    Serial.println(String(volume/vv));
 
     for (int i=0; i<_stepsNum; i++){
         _steps[i].multiplyModQty(volume/vv);
     }
 
+}
+
+bool Recipe::checkEnoughIngredientsInWarehouse()
+{
+
     calculateIngredientQty();
 
+    for(int i=0; i<_ingNum; i++){
+        if (!this->_warehouse->isEnough(_ingredients[i], _ingredientsQty[i])){
+            this->_isAvaiable = false;
+            return false;
+        }
+    }
+
+    this->_isAvaiable = true;
+    return true;
+}
+
+void Recipe::reset()
+{
+    
 }
 
 bool Recipe::addStep(char *info){
@@ -144,7 +151,7 @@ Recipe::Step::Step(char *line, Recipe *recipe){
             token = strtok(nullptr, DELIMITER_CHAR);
             this->_ingredient=recipe->_warehouse->getIngredient(token);
             token = strtok(nullptr, DELIMITER_CHAR);
-            this->_qty=strtol(DELIMITER_CHAR,nullptr, 10);
+            this->_qty=strtol(token,nullptr, 10);
             this->_modQty=this->_qty;
             break;
         case MIX:
@@ -164,10 +171,6 @@ Action Recipe::Step::getAction()
     return this->_action;
 }
 
-short Recipe::Step::getQty()
-{
-    return this->_qty;
-}
 
 short Recipe::Step::getModQty()
 {

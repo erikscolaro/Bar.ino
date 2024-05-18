@@ -509,7 +509,7 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
         _gui->requestTransition(STATE_HOMEPAGE);
         return true;
     } else if (_forward.contains(xcc,ycc)){
-        if (selRecipe->checkQtyInWarehouse()){
+        if (selRecipe->checkEnoughIngredientsInWarehouse()){
             _gui->requestTransition(STATE_EXECUTER);
         } else {
             _gui->showPopup("Errore: non ci sono sufficienti ingredienti. Prova a modificare qualcosa o cambia cocktail.");
