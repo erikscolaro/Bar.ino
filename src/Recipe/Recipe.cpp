@@ -35,10 +35,12 @@ void Recipe::print()
     for (Recipe::StepIterator it = begin(); it!=end(); ++it){
         Serial.print(F("Action: "));
         Serial.print((char) it->getAction());
-        Serial.print(F("\tQuantità: "));
-        Serial.print(it->getModQty());
-        Serial.print(F("\t"));
-        it->getIngredient()->print();
+        if (it->getAction()==ADD){
+            Serial.print(F("\tQuantità: "));
+            Serial.print(it->getModQty());
+            Serial.print(F("\t"));
+            it->getIngredient()->print();
+        } else Serial.println();
     }
 }
 
@@ -75,7 +77,8 @@ void Recipe::adjustTotalVolume(short volume)
         vv+=_ingredientsQty[i];
     }
 
-    Serial.println("[RECIPE]"+String(volume/vv));
+    Serial.print(F("[RECIPE]"));
+    Serial.println(volume/vv);
 
     for (Recipe::StepIterator it = begin(); it != end(); ++it) {
         it->multiplyModQty(volume / vv);

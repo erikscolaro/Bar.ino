@@ -86,11 +86,11 @@ void Ingredient::print() {
     Serial.print(_name);
     Serial.print(F("\tQuantità rimasta: "));
     Serial.print(_qty);
-    Serial.print(F("\t"));
+    Serial.print(F("/"));
     Serial.print(_mqty);
-    if (!_isLiquid) Serial.print(F("\tnot"));
+    if (!_isLiquid) Serial.print(F("\tnot ")); else Serial.print("\t");
     Serial.print(F("liquid and "));
-    if (!_isEditable) Serial.print(F("not"));
+    if (!_isEditable) Serial.print(F("not "));else Serial.print("\t");
     Serial.print("editable\tMemAdx:");
     Serial.println(this->_adx);
 }

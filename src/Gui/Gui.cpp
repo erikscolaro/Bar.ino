@@ -165,8 +165,8 @@ Gui::Gui(){
     recipesFolder.close();
 
     
-    _homepage=Homepage(this);
-    _homepage.show();
+    //_homepage=Homepage(this);
+    //_homepage.show();
     /*
     _drinkPage=DrinkPage(this);
     _settingsPage=SettingsPage(this);
@@ -217,7 +217,9 @@ void Gui::show()
            _tft.println("Beginning gui...");
            break;
        default:
-           Serial.println(F("[GUI]Error: transition to state "+String(uiStatus._next)+" not implemented."));
+           Serial.print(F("[GUI]Error: transition to state "));
+           Serial.print(uiStatus._next);
+           Serial.println(F("not implemented."));
            requestTransition(BEGIN);
            return;
     }
@@ -242,12 +244,15 @@ bool Gui::interact(int xcc, int ycc)
             requestTransition(STATE_HOMEPAGE);
             return true;
         default:
-            Serial.println( F("[GUI] Error: interaction with "+String(uiStatus._next)+" not implemented."));
+            Serial.print( F("[GUI] Error: interaction with "));
+            Serial.print(uiStatus._next);
+            Serial.println(F(" not implemented."));
             requestTransition(BEGIN);
             return false;
     }
 }
 */
+/*
 Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     _pagenum=_gui->_recipesNum/TILE4PAGE+_gui->_recipesNum%TILE4PAGE>0?1:0;
     _pagei=0;
@@ -334,7 +339,7 @@ bool Gui::Homepage::interact(int xcc, int ycc)
     return false;
 }
 
-/*
+
 Gui::SettingsPage::SettingsPage(Gui *gui):_gui(gui)
 {
 }
@@ -581,6 +586,7 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
     }
     return false;
 }
+
 */
 
 void Gui::setSelectedRecipe(Recipe *selectedRecipe)

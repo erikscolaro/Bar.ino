@@ -36,7 +36,7 @@ class Gui{
 
         uiStatus_t uiStatus;
 
-        
+        /*
         class Homepage {
             private:
                 Gui* _gui;
@@ -53,7 +53,7 @@ class Gui{
                 void show();
                 bool interact(int xcc, int ycc);
         };
-/*
+
         class SettingsPage{
             private: 
                 Gui* _gui;
@@ -92,7 +92,7 @@ class Gui{
         */
         //pages
         /**/
-        Homepage _homepage;
+        //Homepage _homepage;
         /*
         SettingsPage _settingsPage;
         ExecutionPage _executionPage;

@@ -18,15 +18,6 @@ void print(String text){
   Serial.println(text);
 }
 
-void printRecipe(Recipe *r){
-  String nome = String(r->getName());
-  print("Nome ricetta: "+ String(nome));
-  print("Passaggi:");
-  for (Recipe::StepIterator it = r->begin(); it!=r->end(); ++it){
-    print("Azione: " + String((char) it->getAction())+ "  Quantità: " + String(it->getModQty())+ "  " + it->getIngredient()->print());
-  }
-}
-
 bool getXY(Gui* gui){
     p = ts.getPoint();
     pinMode(YP, OUTPUT);      //restore shared pins
