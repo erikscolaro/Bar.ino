@@ -75,7 +75,7 @@ void Gui::showImageBL(const char *dir, int x, int y)
     SD.begin(); //ev. sd_ss pin
 
     if (!SD.exists(dir)){
-        Serial.println("[GUI] Errore apertura file! "+String(dir));
+        Serial.print(F("[GUI] Errore apertura file! "));Serial.println(dir);
         return;
     }
 
@@ -133,37 +133,62 @@ uint16_t Gui::getStrHeight(){
 }
 
 Gui::Gui(){
+    Serial.println(F("[GUI]Called Gui builder"));
+
     _tft = MCUFRIEND_kbv(CS, RS, WR, RD, _RST);
+
+    Serial.println(F("[GUI]_tft object correctly initialized"));
 
     _recipesNum=0;
 
     SdFat SD;
+    SD.begin();
 
     File recipesFolder=SD.open(RECIPES_DIR);
+    if (!recipesFolder) Serial.println(F("[GUI]Recipes folder not opened"));
+    else recipesFolder.printName(&Serial);
+    Serial.println();
+
     File activeRecipe;
 
-    while (true && _recipesNum<=RECIPEBOOK_LEN) {
-        activeRecipe = recipesFolder.openNextFile();
-        if (!activeRecipe) break;
-        _recipes[_recipesNum]=Recipe(&activeRecipe, &_warehouse);
+    while (activeRecipe.openNext(&recipesFolder, O_RDONLY) && _recipesNum<=RECIPEBOOK_LEN) {
+        Serial.print(F("\n\n[GUI]Reading recipe named "));
+        activeRecipe.printName(&Serial);
+        Serial.println();
+        if (activeRecipe.isFile()) _recipes[_recipesNum]=Recipe(&activeRecipe, &_warehouse);
+        _recipes[_recipesNum].print();
+
         activeRecipe.close();
-        _recipesNum+=1;
+        _recipesNum++;
     }
 
     recipesFolder.close();
 
+    
     _homepage=Homepage(this);
+    _homepage.show();
+    /*
     _drinkPage=DrinkPage(this);
     _settingsPage=SettingsPage(this);
     _executionPage=ExecutionPage(this);
+    */
 
     uiStatus._actual=BEGIN;
     uiStatus._next=BEGIN;
     requestRefresh();
 }
 
+/*
 void Gui::show()
 {
+
+    Serial.print(F("[GUI]Gui status:\n[_actual] "));
+    Serial.print(uiStatus._actual);
+    Serial.print(F(" \t[_next] "));
+    Serial.print(uiStatus._next);
+    Serial.print(F("\t[_requestrefresh] : "));
+    Serial.println(uiStatus._refreshReq);
+
     State status;
     if (requestedTransition()){
         status = uiStatus._next;
@@ -192,15 +217,16 @@ void Gui::show()
            _tft.println("Beginning gui...");
            break;
        default:
-           Serial.println("Error: transition to state "+String(uiStatus._next)+" not implemented.");
+           Serial.println(F("[GUI]Error: transition to state "+String(uiStatus._next)+" not implemented."));
            requestTransition(BEGIN);
            return;
     }
     completeTransition();
     completeRefresh();
 }
+*/
 
-// This section only sets uiStatus with interact methods of the pages classes.
+/*
 bool Gui::interact(int xcc, int ycc)
 {
     switch (uiStatus._actual){
@@ -216,12 +242,12 @@ bool Gui::interact(int xcc, int ycc)
             requestTransition(STATE_HOMEPAGE);
             return true;
         default:
-            Serial.println( "[GUI] Error: interaction with "+String(uiStatus._next)+" not implemented.");
+            Serial.println( F("[GUI] Error: interaction with "+String(uiStatus._next)+" not implemented."));
             requestTransition(BEGIN);
             return false;
     }
 }
-
+*/
 Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     _pagenum=_gui->_recipesNum/TILE4PAGE+_gui->_recipesNum%TILE4PAGE>0?1:0;
     _pagei=0;
@@ -252,6 +278,7 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     }
     settingsButton.initButtonUL(&gui->_tft, 275, 435, 40, 40, 10, CC, CC, C, "", 1);
 }
+
 
 void Gui::Homepage::show()
 {
@@ -307,6 +334,7 @@ bool Gui::Homepage::interact(int xcc, int ycc)
     return false;
 }
 
+/*
 Gui::SettingsPage::SettingsPage(Gui *gui):_gui(gui)
 {
 }
@@ -553,6 +581,7 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
     }
     return false;
 }
+*/
 
 void Gui::setSelectedRecipe(Recipe *selectedRecipe)
 {

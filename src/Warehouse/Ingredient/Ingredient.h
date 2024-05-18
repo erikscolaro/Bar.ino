@@ -37,7 +37,7 @@ public:
     bool isLiquid() const;
     bool isEditable() const;
 
-    String print();
+    void print();
 
     //interacts with eeprom!!!
     bool subtractQuantity(short subQty);

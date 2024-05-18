@@ -17,6 +17,6 @@
 #define _RST A4
 
 
-#define RECIPES_DIR "/res/recipes"
+#define RECIPES_DIR "/recipes"
 
 #endif

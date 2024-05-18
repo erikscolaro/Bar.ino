@@ -3,7 +3,7 @@
 
 //********** Gui settings **********//
 
-#define RECIPEBOOK_LEN 32
+#define RECIPEBOOK_LEN 10 
 #define BUF_LEN 50
 
 //  Touchscreen settings
@@ -34,7 +34,7 @@
 #define CUTOFF_COLOR 0xFFBF
 
 //********** Gui.homepage settings **********//
-#define HOMEPAGE_MAX_PAGES 9
+#define HOMEPAGE_MAX_PAGES 4
 #define TILE4ROW 3
 #define TILE4COL 2
 #define TILE4PAGE TILE4ROW*TILE4COL

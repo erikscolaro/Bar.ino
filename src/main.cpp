@@ -14,6 +14,19 @@ TouchScreen ts(XP, YP, XM, YM, TOUCH_OHM);
 TSPoint p;
 Point cc;
 
+void print(String text){
+  Serial.println(text);
+}
+
+void printRecipe(Recipe *r){
+  String nome = String(r->getName());
+  print("Nome ricetta: "+ String(nome));
+  print("Passaggi:");
+  for (Recipe::StepIterator it = r->begin(); it!=r->end(); ++it){
+    print("Azione: " + String((char) it->getAction())+ "  Quantità: " + String(it->getModQty())+ "  " + it->getIngredient()->print());
+  }
+}
+
 bool getXY(Gui* gui){
     p = ts.getPoint();
     pinMode(YP, OUTPUT);      //restore shared pins
@@ -30,7 +43,7 @@ bool getXY(Gui* gui){
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("CIAO porco");
+  Serial.println("Start");
 
   int i=0;
   SdFat SD;
@@ -46,21 +59,8 @@ void setup() {
 
 }
 
-void print(String text){
-  Serial.println(text);
-}
-
-void printRecipe(Recipe *r){
-  String nome = String(r->getName());
-  print("Nome ricetta: "+ String(nome));
-  print("Passaggi:");
-  r->iteratorBegin();
-  while (r->iteratorNext()){
-    print("Azione: " + String((char) r->iteratorGetAction())+ "  Quantità: " + String(r->iteratorGetQty())+ "  " + r->iteratorGetIngredient()->print());
-  }
-}
-
 void loop() {
+  /*
   Warehouse warehouse = Warehouse();
   SdFat SD;
   SD.begin(SD_SS, SD_SCK_MHZ(16));
@@ -71,31 +71,38 @@ void loop() {
   //to debug
 
   printRecipe(&r);
-  Serial.println("Aggiungo 100 ml di prosecco");
-  Serial.println( "check sulla memorizzazione del valore"+ String(r.addIngredientQty(prosecco, 100)));
+  print("Aggiungo 1000 ml di prosecco");
+  print( "check sulla memorizzazione del valore "+ String(r.addIngredientQty(prosecco, 1000)));
   printRecipe(&r);
-  Serial.println("Ci sono abbastanza ingredienti?:" + String(r.checkEnoughIngredientsInWarehouse()));
-  Serial.println("aggiusto il volume..");
+  print("Ci sono abbastanza ingredienti?:" + String(r.checkEnoughIngredientsInWarehouse()));
+  print("\naggiusto il volume..");
   r.adjustTotalVolume(100);
-  r.checkEnoughIngredientsInWarehouse();
+  print("Ci sono abbastanza ingredienti?:" + String(r.checkEnoughIngredientsInWarehouse()));
   printRecipe(&r);
   
-  Serial.println("testo l'accesso mediante lista di ingredienti");
+  print("\ntesto l'accesso mediante lista di ingredienti");
   Ingredient* const* ingredienti = r.getIngredients();
   for (int i=0; i<r.getIngredientsNum(); i++){
-    Serial.println(ingredienti[i]->print());
-    Serial.println("quantità totale richiesta: "+String(r.getIngredientRequiredQty(ingredienti[i])));
-
+    print(ingredienti[i]->print());
+    print("quantità totale richiesta: "+String(r.getIngredientRequiredQty(ingredienti[i])));
   }
 
+  print("\nreset delle quantità e stampa");
+  r.reset();
+  printRecipe(&r);
+
   while (true){delay(10);}
-/*   Gui interfaccia=Gui();
+  */
+  
+  Serial.println("GUI BUILDING");
+  Gui interfaccia=Gui();
   Serial.println("GUI READY.");
-  interfaccia.show();
+  //interfaccia.show();
+  while (true){delay(10);}
   while (true){
     if (getXY(&interfaccia)){
-      interfaccia.interact(cc.mapped_x, cc.mapped_y);
+      //interfaccia.interact(cc.mapped_x, cc.mapped_y);
     }
     delay(10);
-  } */
+  } 
 }

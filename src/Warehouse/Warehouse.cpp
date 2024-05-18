@@ -2,10 +2,13 @@
 
 
 Warehouse::Warehouse(){
-    Serial.println("[WAREHOUSE]Checking where ingredients info are stored...");
+    Serial.println(F("[WAREHOUSE]Checking where ingredients info are stored..."));
     uint8_t magic_number= EEPROM.read(0);
     _storedIngredients=0;
-    Serial.println("Numero salvato in eeprom:"+ String(magic_number) + "  Numero magico:" + String(MAGIC_CHECK));
+    Serial.print(F("Stored number in EEPROM: "));
+    Serial.print(magic_number);
+    Serial.print(F("\t Magic number: "));
+    Serial.println(MAGIC_CHECK);
     if (magic_number==MAGIC_CHECK) readIngredientsFromEEPROM();
     else readIngredientsFromSD();
 }
@@ -34,20 +37,23 @@ bool Warehouse::isEnough(Ingredient const *ingredient, short qty)
 }
 
 void Warehouse::readIngredientsFromEEPROM(){
-    Serial.println("[WAREHOUSE]Reading from EEPROM...");
+    Serial.println(F("[WAREHOUSE]Reading from EEPROM..."));
     if (EEPROM.read(1)>NUM_INGREDIENTS){
-        Serial.println("[WAREHOUSE]Error: too many ingredients stored in EEPROM, increase the size of the ingredients array");
+        Serial.println(F("[WAREHOUSE]Error: too many ingredients stored in EEPROM, increase the size of the ingredients array"));
         _storedIngredients=NUM_INGREDIENTS;
     } else _storedIngredients=EEPROM.read(1);
 
     for (uint8_t i=0; i<_storedIngredients; i++){
         EEPROM.get(4+ i*sizeof(Ingredient), _ingredients[i]);
-        Serial.println("[WAREHOUSE]"+String(i)+".\t"+_ingredients[i].print());
+        Serial.print(F("[WAREHOUSE]"));
+        Serial.print(i);
+        Serial.print(F(".\t"));
+        _ingredients[i].print();
     }
 }
 
 void Warehouse::readIngredientsFromSD(){
-    Serial.println("[WAREHOUSE]Reading ingredients from SD...");
+    Serial.println(F("[WAREHOUSE]Reading ingredients from SD..."));
 
     SdFat SD;
     SD.begin();
@@ -63,7 +69,7 @@ void Warehouse::readIngredientsFromSD(){
         n = file.fgets(buf, sizeof(buf)); //read a line
 
         if (buf[n - 1] != '\n' && n == (sizeof(buf) - 1)) {
-            Serial.println("[WAREHOUSE]ERROR: line of csv file ingredients is too long!");
+            Serial.println(F("[WAREHOUSE]ERROR: line of csv file ingredients is too long!"));
             file.close();
             SD.end();
             while(true);
@@ -71,8 +77,10 @@ void Warehouse::readIngredientsFromSD(){
             file.seek(filePos);
             file.fgets(buf2, sizeof(buf2));
             while (memcmp(buf, buf2, sizeof(buf))!=0){
-                Serial.println("[WAREHOUSE]WARNING: inconsistency in reading data from sd.");
-                Serial.println(String(buf)+"\n"+String(buf2));
+                Serial.println(F("[WAREHOUSE]WARNING: inconsistency in reading data from sd."));
+                Serial.print(buf);
+                Serial.print(F("\n"));
+                Serial.println(buf2);
                 memset(buf, 0, sizeof(buf));
                 memset(buf2, 0, sizeof(buf2));
                 file.seek(filePos);
@@ -85,7 +93,7 @@ void Warehouse::readIngredientsFromSD(){
     }
 
     if (sizeof(Ingredient)*_storedIngredients+4 > EEPROM.length()){
-        Serial.println("[WAREHOUSE]Error: too many ingredients to store in eeprom.");
+        Serial.println(F("[WAREHOUSE]Error: too many ingredients to store in eeprom."));
         return;
     }
 
@@ -95,7 +103,10 @@ void Warehouse::readIngredientsFromSD(){
     for (uint8_t i=0; i<_storedIngredients; i++){
         _ingredients[i].setAdx(4+ i*sizeof(Ingredient));
         EEPROM.put(_ingredients[i].getAdx(), _ingredients[i]);
-        Serial.println("[WAREHOUSE]"+String(i)+".\t"+_ingredients[i].print());
+        Serial.print(F("[WAREHOUSE]"));
+        Serial.print(i);
+        Serial.println(F(".\t"));
+        _ingredients[i].print();
     }
 
     SD.end();
@@ -104,7 +115,7 @@ void Warehouse::readIngredientsFromSD(){
 
 bool Warehouse::addIngredient(char *info){
     if (_storedIngredients>=NUM_INGREDIENTS){
-        Serial.println("[WAREHOUSE]Error: too many ingredients to store!");
+        Serial.println(F("[WAREHOUSE]Error: too many ingredients to store!"));
         return false;
     }
 

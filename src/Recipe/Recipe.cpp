@@ -1,8 +1,5 @@
 #include "Recipe.h"
 
-Recipe::Recipe(){
-}
-
 Recipe::Recipe(File* file, Warehouse *warehouse) : _warehouse(warehouse)
 {
     char buf[50];
@@ -30,32 +27,42 @@ Recipe::Recipe(File* file, Warehouse *warehouse) : _warehouse(warehouse)
     checkEnoughIngredientsInWarehouse();
 }
 
-const char *Recipe::getName() const
+void Recipe::print()
 {
-    return this->_name;
+    Serial.print(F("[RECIPE]Recipe dump\nName:"));
+    Serial.println(getName());
+    Serial.println(F("Steps:"));
+    for (Recipe::StepIterator it = begin(); it!=end(); ++it){
+        Serial.print(F("Action: "));
+        Serial.print((char) it->getAction());
+        Serial.print(F("\tQuantità: "));
+        Serial.print(it->getModQty());
+        Serial.print(F("\t"));
+        it->getIngredient()->print();
+    }
 }
 
-short Recipe::getStepsNum() const
+const short Recipe::getIngredientRequiredQty(Ingredient *ingredient)
 {
-    return this->_stepsNum;
-}
-
-short Recipe::getIngredientRequiredQty(Ingredient *ingredient) const
-{
-    for (int i=0; i<_ingNum; i++){
-        if (_ingredients[i]==ingredient) return _ingredientsQty[i];
+    for (StepIterator it = begin(); it != end(); ++it) {
+        if (it->getIngredient() == ingredient) {
+            return it->getModQty();
+        }
     }
     return 0;
 }
 
 bool Recipe::addIngredientQty(const Ingredient *ingredient, short qty)
 {
-    for (int i=0; i<_stepsNum; i++){
-        if (_steps[i].getIngredient()==ingredient){
-            if (_warehouse->isEnough(ingredient, _steps[i].getModQty()+qty)){
-                _steps[i].addModQty(qty);
+
+    for (StepIterator it = begin(); it != end(); ++it) {
+        if (it->getIngredient() == ingredient) {
+            if (_warehouse->isEnough(ingredient, it->getModQty() + qty)) {
+                it->addModQty(qty);
                 return true;
-            } else return false;
+            } else {
+                return false;
+            }
         }
     }
     return false;
@@ -68,10 +75,10 @@ void Recipe::adjustTotalVolume(short volume)
         vv+=_ingredientsQty[i];
     }
 
-    Serial.println(String(volume/vv));
+    Serial.println("[RECIPE]"+String(volume/vv));
 
-    for (int i=0; i<_stepsNum; i++){
-        _steps[i].multiplyModQty(volume/vv);
+    for (Recipe::StepIterator it = begin(); it != end(); ++it) {
+        it->multiplyModQty(volume / vv);
     }
 
 }
@@ -94,7 +101,7 @@ bool Recipe::checkEnoughIngredientsInWarehouse()
 
 void Recipe::reset()
 {
-    
+    for(StepIterator it = begin(); it!=end(); ++it){it->reset();}
 }
 
 bool Recipe::addStep(char *info){
@@ -137,12 +144,6 @@ void Recipe::calculateIngredientQty(){
     }
 }
 
-Recipe::Step::Step(){
-    this->_action=SKIP;
-    this->_ingredient=nullptr;
-    this->_qty=-1;
-}
-
 Recipe::Step::Step(char *line, Recipe *recipe){
     char *token = strtok(line, DELIMITER_CHAR);
     this->_action=static_cast<Action>(token[0]);
@@ -165,31 +166,3 @@ Recipe::Step::Step(char *line, Recipe *recipe){
     }
    
 }
-
-Action Recipe::Step::getAction()
-{
-    return this->_action;
-}
-
-
-short Recipe::Step::getModQty()
-{
-    return this->_modQty;
-}
-
-void Recipe::Step::addModQty(short qty)
-{
-    _modQty+=qty;
-}
-
-void Recipe::Step::multiplyModQty(float scale)
-{
-    this->_modQty*=scale;
-}
-
-Ingredient *Recipe::Step::getIngredient()
-{
-    return this->_ingredient;
-}
-
-

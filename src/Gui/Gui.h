@@ -10,25 +10,42 @@
 #include "Gui/BitmapReader/BitmapReader.h"
 #include "Gui/Button/Button.h"
 
-//we need a new way to store pages, i can attempt a multiple class file
-//in order not to fragmentate too much the file
-
 #include "Glyphs.h"
 #include "general.settings.h"
 #include "gui.settings.h"
 
 class Gui{
     private:
+        //transversal
+        MCUFRIEND_kbv _tft;
+        Warehouse _warehouse;
+        Recipe _recipes[RECIPEBOOK_LEN]; 
+        //unfortunatly, it stores _recipes in ram, so i need to implement PROGMEM
+        
+        short _recipesNum;
+        MCUFRIEND_kbv* getTftptr(){return &_tft;}
+
+        enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER, ERROR, BEGIN};
+        //needed to manage page transition
+        typedef struct {
+            State _actual;
+            State _next;
+            Recipe* _selectedRecipe;
+            bool _refreshReq;
+        } uiStatus_t;
+
+        uiStatus_t uiStatus;
+
+        
         class Homepage {
             private:
                 Gui* _gui;
-                Button drinkButtons[HOMEPAGE_MAX_PAGES][TILE4PAGE];
-                Button navigationButtons[HOMEPAGE_MAX_PAGES];
+                Button drinkButtons[RECIPEBOOK_LEN/TILE4PAGE+1][TILE4PAGE];
+                Button navigationButtons[RECIPEBOOK_LEN/TILE4PAGE+1];
                 Button settingsButton;
                 short _pagei;
                 short _pagenum;
                 char numToStr[9][2] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-
 
             public:
                 Homepage(){};
@@ -36,7 +53,7 @@ class Gui{
                 void show();
                 bool interact(int xcc, int ycc);
         };
-
+/*
         class SettingsPage{
             private: 
                 Gui* _gui;
@@ -72,23 +89,17 @@ class Gui{
                 void show();
                 bool interact(int xcc, int ycc);
         };
-
+        */
         //pages
+        /**/
         Homepage _homepage;
+        /*
         SettingsPage _settingsPage;
         ExecutionPage _executionPage;
         DrinkPage _drinkPage;
+        */
 
-        enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER, ERROR, BEGIN};
-        //needed to manage page transition
-        typedef struct {
-            State _actual;
-            State _next;
-            Recipe* _selectedRecipe;
-            bool _refreshReq;
-        } uiStatus_t;
-
-        uiStatus_t uiStatus;
+        //status methods
         void setSelectedRecipe(Recipe* selectedRecipe);
         Recipe* getSelectedRecipe();
 
@@ -100,18 +111,13 @@ class Gui{
         bool requestedRefresh();
         void completeRefresh();
 
-        //request to the active page to check if there are interactions with its elements
-        void checkInteration(int16_t x, int16_t y);
-        void showPopup(char* error);    //da implementare come classe?
+        //interact
+        void checkInteractions(int16_t x, int16_t y);
 
-        //transversal
-        MCUFRIEND_kbv _tft;
-        Warehouse _warehouse;
-        Recipe _recipes[RECIPEBOOK_LEN];
-        short _recipesNum;
-        MCUFRIEND_kbv* getTftptr(){return &_tft;}
+        //error 
+        void showPopup(char* error);
 
-        //general purpose functions
+        //drawing methods
         void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line);
         void showImageBL(const char* dir, int x, int y);
         void drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h ,uint16_t color,const uint16_t bitmap[]);
@@ -124,5 +130,4 @@ class Gui{
         bool interact(int xcc, int ycc);
         int screenWidth(){return _tft.width();}
         int screenHeight(){return _tft.height();}
-
 };

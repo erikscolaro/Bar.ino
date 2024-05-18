@@ -20,17 +20,18 @@ class Recipe {
 
         class Step {
             public:
-                Step();
+                Step():_action(SKIP), _qty(-1), _modQty(-1), _ingredient(nullptr){};
                 Step(char* line, Recipe* recipe);
-                Action getAction();
-                short getModQty();
-                void addModQty(short qty);
-                void multiplyModQty(float scale);
-                Ingredient* getIngredient();
+                Action getAction() const            {return _action;}
+                short getModQty() const             {if (_action!=ADD) return 0; return _modQty;}
+                void addModQty(short qty)           {_modQty+=qty;}
+                void multiplyModQty(float scale)    {_modQty*=scale;}
+                void reset()                        {this->_modQty=_qty;}
+                Ingredient* getIngredient() const   {return _ingredient;}
             private:
-                Action _action = SKIP;
-                short _qty = -1;
-                short _modQty = -1;
+                Action _action;
+                short _qty;
+                short _modQty;
                 Ingredient* _ingredient = nullptr;
         };
         
@@ -56,20 +57,22 @@ class Recipe {
                 size_t current;
             public:
                 StepIterator(Step * recipeSteps, size_t index):steps(recipeSteps), current(index) {};
-                bool operator==(const StepIterator& other) const {return current == other.current;}
-                bool operator!=(const StepIterator& other) const {return !(*this == other);}
-                Step& operator*() { return steps[current];}
-                StepIterator& operator++() {++current;return *this;}
+                bool operator==(const StepIterator& other) const    {return current == other.current;}
+                bool operator!=(const StepIterator& other) const    {return !(*this == other);}
+                Step* operator->()                                  {return &steps[current];}
+                StepIterator& operator++()                          {++current;return *this;}
         };
         
-        Recipe();
+        Recipe(){};
         Recipe(File* recipeFile, Warehouse* warehouse);
+
+        void print();
         
-        const char* getName() const;
-        short getStepsNum() const;
-        short getIngredientsNum() const {return _ingNum;}
-        Ingredient* const* getIngredients() const {return _ingredients;}
-        short getIngredientRequiredQty(Ingredient* ingredient) const;
+        const char* getName() const                 {return _name;}
+        short getStepsNum() const                   {return _stepsNum;}
+        short getIngredientsNum() const             {return _ingNum;}
+        Ingredient* const* getIngredients() const   {return _ingredients;}
+        const short getIngredientRequiredQty(Ingredient* ingredient);
 
         //add qty to moqqty relative to the first step that involves the ingredient
         bool addIngredientQty(const Ingredient* ingredient, short qty);
@@ -78,6 +81,6 @@ class Recipe {
         void reset();
         
         //iterator
-        StepIterator begin(){return StepIterator(this->_steps, 0);}
-        StepIterator end(){return StepIterator(this->_steps, this->_stepsNum);}
+        StepIterator begin()                        {return StepIterator(this->_steps, 0);}
+        StepIterator end()                          {return StepIterator(this->_steps, this->_stepsNum);}
 };

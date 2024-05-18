@@ -80,13 +80,19 @@ void Ingredient::setAdx(short adx)
     _adx=adx;
 }
 
-String Ingredient::print() {
-    return String("Name: " + String(_name) + "\t" +
-                  "Quantità rimasta: " + String(_qty) + "/" + String(_mqty) + "\t" +
-                  (_isLiquid ? "is liquid" : "is not liquid") +
-                  " and " +
-                  (_isEditable ? "is editable" : "is not editable") +
-                  " Indirizzo: "+String(this->_adx));
+void Ingredient::print() {
+    if (this==nullptr) Serial.println(F("Not a valid ingredient reference."));
+    Serial.print(F("Name: "));
+    Serial.print(_name);
+    Serial.print(F("\tQuantità rimasta: "));
+    Serial.print(_qty);
+    Serial.print(F("\t"));
+    Serial.print(_mqty);
+    if (!_isLiquid) Serial.print(F("\tnot"));
+    Serial.print(F("liquid and "));
+    if (!_isEditable) Serial.print(F("not"));
+    Serial.print("editable\tMemAdx:");
+    Serial.println(this->_adx);
 }
 
 bool Ingredient::subtractQuantity(short subQty)
