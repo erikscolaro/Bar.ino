@@ -20,7 +20,6 @@ class Gui{
         MCUFRIEND_kbv _tft;
         Warehouse _warehouse;
         Recipe _recipes[RECIPEBOOK_LEN]; 
-        //unfortunatly, it stores _recipes in ram, so i need to implement PROGMEM
         
         short _recipesNum;
         MCUFRIEND_kbv* getTftptr(){return &_tft;}
@@ -36,16 +35,15 @@ class Gui{
 
         uiStatus_t uiStatus;
 
-        /*
+        
         class Homepage {
             private:
                 Gui* _gui;
-                Button drinkButtons[RECIPEBOOK_LEN/TILE4PAGE+1][TILE4PAGE];
+                Button drinkButtons[TILE4PAGE];
                 Button navigationButtons[RECIPEBOOK_LEN/TILE4PAGE+1];
                 Button settingsButton;
                 short _pagei;
                 short _pagenum;
-                char numToStr[9][2] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
             public:
                 Homepage(){};
@@ -53,6 +51,7 @@ class Gui{
                 void show();
                 bool interact(int xcc, int ycc);
         };
+        /*
 
         class SettingsPage{
             private: 
@@ -91,8 +90,8 @@ class Gui{
         };
         */
         //pages
-        /**/
-        //Homepage _homepage;
+
+        Homepage _homepage;
         /*
         SettingsPage _settingsPage;
         ExecutionPage _executionPage;
@@ -121,7 +120,7 @@ class Gui{
         void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line);
         void showImageBL(const char* dir, int x, int y);
         void drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h ,uint16_t color,const uint16_t bitmap[]);
-        void showTileOverlayUL(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t radius, const char* label, char* imageDir);
+        void showTileUL(Button *button, const Recipe* recipe);
         uint16_t getStrHeight();
 
     public:

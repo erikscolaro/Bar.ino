@@ -115,14 +115,17 @@ void Gui::drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h, uint16
     _tft.endWrite();
 }
 
-void Gui::showTileOverlayUL(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t radius, const char* label, char* imageDir)
+void Gui::showTileUL(Button* button, const Recipe* recipe)
 {
-    char tempLabel[TILE_CHAR4LINE*2];
-    strncpy(tempLabel, label, sizeof(tempLabel)-1);
+    int16_t x = button->getX1(),y = button->getY1(); 
+    uint16_t w = button->getH(),h = button->getH(),radius = button->getRadius();
     uint16_t textbox_h = 40;
-    showImageBL(imageDir, x, y + h - textbox_h);
+    button->drawButton();
+    char buf[TILE_CHAR4LINE*2+1];
+    sprintf(buf, "%s%s.bmp", IMAGES_DIR, recipe->getName());
+    showImageBL(buf, x, y + h - textbox_h);
     _tft.fillRoundRect(x + 1, y + h - textbox_h + 1, w - 2, textbox_h - 2, radius - 2, CCC);
-    showTextCL(tempLabel, x + radius / 2, y + (h - radius) / 2, textbox_h - radius / 2, &FreeSans9pt7b, 1, CCCC, TILE_CHAR4LINE);
+    showTextCL(recipe->getName(), x + radius / 2, y + (h - radius) / 2, textbox_h - radius / 2, &FreeSans9pt7b, 1, CCCC, TILE_CHAR4LINE);
 }
 
 uint16_t Gui::getStrHeight(){
@@ -165,8 +168,7 @@ Gui::Gui(){
     recipesFolder.close();
 
     
-    //_homepage=Homepage(this);
-    //_homepage.show();
+    _homepage=Homepage(this);
     /*
     _drinkPage=DrinkPage(this);
     _settingsPage=SettingsPage(this);
@@ -252,7 +254,7 @@ bool Gui::interact(int xcc, int ycc)
     }
 }
 */
-/*
+
 Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     _pagenum=_gui->_recipesNum/TILE4PAGE+_gui->_recipesNum%TILE4PAGE>0?1:0;
     _pagei=0;
@@ -262,10 +264,10 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     uint16_t th = (480 - 50 - 2 * side_spacing - tile_spacing * (TILE4COL - 1)) / TILE4COL;
     uint16_t x, y;
 
-    for (int i=0; i<_gui->_recipesNum; i++){
+    for (int i=0; i< TILE4PAGE; i++){
         x = side_spacing + (tw + tile_spacing) * (i % TILE4ROW);
         y = side_spacing + (th + tile_spacing) * (i / TILE4ROW);
-        drinkButtons[i/TILE4PAGE][i%TILE4PAGE].initButtonUL(
+        drinkButtons[i].initButtonUL(
             &gui->_tft, x, y, tw, th, radius, CCC, WHITE, TRANSPARENT, NULL, 1
         );
     }
@@ -279,7 +281,7 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     for (int i = 0; i < _pagenum; i++)
     {
         x = side_spacing + (bw + button_spacing) * i;
-        navigationButtons[i].initButtonUL(&gui->_tft, x, y, bw, bh, radius, i == _pagei ? CCCC : C, CC, CCCC, numToStr[i] ,1);
+        navigationButtons[i].initButtonUL(&gui->_tft, x, y, bw, bh, radius, i == _pagei ? CCCC : C, CC, CCCC, &numbers[i*2] ,1);
     }
     settingsButton.initButtonUL(&gui->_tft, 275, 435, 40, 40, 10, CC, CC, C, "", 1);
 }
@@ -288,21 +290,10 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
 void Gui::Homepage::show()
 {
     if (_gui->requestedTransition()) _gui->_tft.fillScreen(C_BACK);
-
-    uint16_t tile_spacing = 10, side_spacing = 10, radius = 10;
-    uint16_t tw = (320 - side_spacing * 2 - tile_spacing * (TILE4ROW - 1)) / TILE4ROW;
-    uint16_t th = (480 - 50 - 2 * side_spacing - tile_spacing * (TILE4COL - 1)) / TILE4COL;
-    uint16_t x, y;
-
     _gui->_tft.setFont(&FreeSans9pt7b);
-    char imageDir[50];
 
-    for (int i=TILE4PAGE*_pagei; i<min(_gui->_recipesNum, TILE4PAGE*(_pagei+1)); i++){
-        x = side_spacing + (tw + tile_spacing) * (i % TILE4ROW);
-        y = side_spacing + (th + tile_spacing) * (i / TILE4ROW);
-        drinkButtons[i/TILE4PAGE][i%TILE4PAGE].drawButton();
-        sprintf(imageDir, "%s%s%s.bmp", IMAGES_DIR, _gui->_recipes[i].getName(), _gui->_recipes[i].getName());
-        _gui->showTileOverlayUL(x,y,tw,th,radius, _gui->_recipes[i].getName(), imageDir);
+    for (int i=0; i<TILE4PAGE; i++){
+        _gui->showTileUL(&(drinkButtons[i]), &(_gui->_recipes[i]));
     }
 
     if (_gui->requestedTransition()){
@@ -314,9 +305,9 @@ void Gui::Homepage::show()
 
 bool Gui::Homepage::interact(int xcc, int ycc)
 {
-    for (int i=TILE4PAGE*_pagei; i<min(_gui->_recipesNum, TILE4PAGE*(_pagei+1)); i++){
-        if (drinkButtons[i/TILE4PAGE][i%TILE4PAGE].contains(xcc, ycc)){
-            _gui->setSelectedRecipe(&_gui->_recipes[i]);
+    for (int i=0; i<TILE4PAGE; i++){
+        if (drinkButtons[i].contains(xcc, ycc)){
+            _gui->setSelectedRecipe(&_gui->_recipes[i+TILE4PAGE*_pagei]);
             _gui->requestTransition(STATE_DRINK);
             return true;
         }
@@ -339,6 +330,7 @@ bool Gui::Homepage::interact(int xcc, int ycc)
     return false;
 }
 
+/*
 
 Gui::SettingsPage::SettingsPage(Gui *gui):_gui(gui)
 {

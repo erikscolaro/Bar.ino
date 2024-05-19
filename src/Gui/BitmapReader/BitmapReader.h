@@ -5,7 +5,7 @@
 
 class BitmapReader{
     public:
-        BitmapReader();
+        BitmapReader(){};
         BitmapReader(File* bmp);
         bool readRow(uint16_t *buf);
 

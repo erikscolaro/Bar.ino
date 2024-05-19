@@ -1,7 +1,7 @@
 #include "Button.h"
 #include "gui.settings.h"
 
-void Button::initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t radius, uint16_t outline, uint16_t fill, uint16_t textcolor, char *label, uint8_t textsize)
+void Button::initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t radius, uint16_t outline, uint16_t fill, uint16_t textcolor, const char *label, uint8_t textsize)
 {
     _x1 = x1;
     _y1 = y1;
@@ -31,6 +31,11 @@ void Button::drawButton()
         _gfx->setTextSize(_textsize, _textsize);
         _gfx->print(_label);
         }
+}
+
+void Button::setLabel(char *newLabel)
+{
+    this->_label=newLabel;
 }
 
 bool Button::contains(int16_t x, int16_t y)

@@ -41,6 +41,8 @@
 #define IMAGES_DIR "/images/"
 #define TILE_CHAR4LINE 10
 
+const char numbers[] PROGMEM = "1\0" "2\0" "3\0" "4\0" "5\0" "6\0" "7\0" "8\0" "9\0";
+
 //********** Gui.drinkpage settings **********//
 #define SETTINGS_MAX_NUM 5
 enum DrinkCapacity: short {
