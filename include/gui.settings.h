@@ -3,7 +3,6 @@
 
 //********** Gui settings **********//
 
-#define RECIPEBOOK_LEN 10 
 #define BUF_LEN 50
 
 //  Touchscreen settings
@@ -37,11 +36,11 @@
 #define HOMEPAGE_MAX_PAGES 4
 #define TILE4ROW 3
 #define TILE4COL 2
-#define TILE4PAGE TILE4ROW*TILE4COL
+#define TILE4PAGE (TILE4ROW*TILE4COL)
 #define IMAGES_DIR "/images/"
 #define TILE_CHAR4LINE 10
 
-const char numbers[] PROGMEM = "1\0" "2\0" "3\0" "4\0" "5\0" "6\0" "7\0" "8\0" "9\0";
+const char numbers[] = "1\0" "2\0" "3\0" "4\0" "5\0" "6\0" "7\0" "8\0" "9\0";
 
 //********** Gui.drinkpage settings **********//
 #define SETTINGS_MAX_NUM 5

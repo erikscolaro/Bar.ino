@@ -23,6 +23,7 @@ Recipe::Recipe(File* file, Warehouse *warehouse) : _warehouse(warehouse)
         }
     }
 
+    print();
     calculateIngredientQty();
     checkEnoughIngredientsInWarehouse();
 }

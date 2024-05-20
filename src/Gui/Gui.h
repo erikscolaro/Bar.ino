@@ -19,28 +19,19 @@ class Gui{
         //transversal
         MCUFRIEND_kbv _tft;
         Warehouse _warehouse;
-        Recipe _recipes[RECIPEBOOK_LEN]; 
+        char _recipesNames[TILE4PAGE][RECIPE_NAME_LEN];
+        
         
         short _recipesNum;
         MCUFRIEND_kbv* getTftptr(){return &_tft;}
 
         enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER, ERROR, BEGIN};
-        //needed to manage page transition
-        typedef struct {
-            State _actual;
-            State _next;
-            Recipe* _selectedRecipe;
-            bool _refreshReq;
-        } uiStatus_t;
 
-        uiStatus_t uiStatus;
-
-        
         class Homepage {
             private:
                 Gui* _gui;
                 Button drinkButtons[TILE4PAGE];
-                Button navigationButtons[RECIPEBOOK_LEN/TILE4PAGE+1];
+                Button navigationButtons[HOMEPAGE_MAX_PAGES];
                 Button settingsButton;
                 short _pagei;
                 short _pagenum;
@@ -98,9 +89,19 @@ class Gui{
         DrinkPage _drinkPage;
         */
 
+        //needed to manage page transition
+        typedef struct {
+            State _actual;
+            State _next;
+            Recipe _activeRecipe;
+            bool  _refreshReq;
+        } uiStatus_t;
+
+        uiStatus_t uiStatus;
+
         //status methods
-        void setSelectedRecipe(Recipe* selectedRecipe);
-        Recipe* getSelectedRecipe();
+        void setSelectedRecipeDir(char* recipeName);
+        Recipe* getSelectedRecipeDir();
 
         void requestTransition(State newState);
         bool requestedTransition();
@@ -120,7 +121,7 @@ class Gui{
         void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line);
         void showImageBL(const char* dir, int x, int y);
         void drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h ,uint16_t color,const uint16_t bitmap[]);
-        void showTileUL(Button *button, const Recipe* recipe);
+        void showTileUL(Button *button, const char* label);
         uint16_t getStrHeight();
 
     public:

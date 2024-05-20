@@ -3,6 +3,7 @@
 void Gui::showTextCL(const char *text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line)
 {
     if (font!=NULL) _tft.setFont(font);
+    else _tft.setFont(&FreeSans9pt7b);
     _tft.setTextSize(size);
     _tft.setTextColor(color);
     if (h==-1){ 
@@ -72,7 +73,7 @@ void Gui::showTextCL(const char *text, uint16_t xl, uint16_t yc, int16_t h, cons
 void Gui::showImageBL(const char *dir, int x, int y)
 {
     SdFat SD;
-    SD.begin(); //ev. sd_ss pin
+    SD.begin(SD_SS, SD_SCK_MHZ(50)); //ev. sd_ss pin
 
     if (!SD.exists(dir)){
         Serial.print(F("[GUI] Errore apertura file! "));Serial.println(dir);
@@ -86,13 +87,13 @@ void Gui::showImageBL(const char *dir, int x, int y)
 
     uint16_t color;
 
-    for (int yt = y; 
-        (yt >= y - bmpReader.getHeight()) && bmpReader.readRow(buf); 
-        yt--){
-        for (int16_t i = 0; i < bmpReader.getWidth(); i++){
-            color = buf[i];
-            if (color <= CUTOFF_COLOR){
-                _tft.drawPixel(x + i, yt, buf[i]);
+    int16_t start_y = y - bmpReader.getHeight() + 1;
+    for (int yt = y; yt >= start_y && bmpReader.readRow(buf); yt--) {
+        uint16_t* buf_ptr = buf;
+        for (int16_t i = 0; i < bmpReader.getWidth(); i++, buf_ptr++) {
+            color = *buf_ptr;
+            if (color <= CUTOFF_COLOR) {
+                _tft.drawPixel(x + i, yt, color);
             }
         }
     }
@@ -115,17 +116,18 @@ void Gui::drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h, uint16
     _tft.endWrite();
 }
 
-void Gui::showTileUL(Button* button, const Recipe* recipe)
+void Gui::showTileUL(Button* button, const char* label)
 {
     int16_t x = button->getX1(),y = button->getY1(); 
-    uint16_t w = button->getH(),h = button->getH(),radius = button->getRadius();
+    uint16_t w = button->getW(),h = button->getH(),radius = button->getRadius();
     uint16_t textbox_h = 40;
     button->drawButton();
     char buf[TILE_CHAR4LINE*2+1];
-    sprintf(buf, "%s%s.bmp", IMAGES_DIR, recipe->getName());
-    showImageBL(buf, x, y + h - textbox_h);
-    _tft.fillRoundRect(x + 1, y + h - textbox_h + 1, w - 2, textbox_h - 2, radius - 2, CCC);
-    showTextCL(recipe->getName(), x + radius / 2, y + (h - radius) / 2, textbox_h - radius / 2, &FreeSans9pt7b, 1, CCCC, TILE_CHAR4LINE);
+    sprintf(buf, "%s%s.bmp", IMAGES_DIR, label);
+    showImageBL(buf, x + 10 , y + h - textbox_h+10);
+    _tft.fillRoundRect(x, y + h - textbox_h, w, textbox_h, radius - 2, CCC);
+    _tft.drawRoundRect(x, y + h - textbox_h, w, textbox_h, radius - 2, CCCC);
+    showTextCL(label, x + radius / 2, y + h - textbox_h/2, textbox_h - radius, &FreeSans9pt7b, 1, CCCC, TILE_CHAR4LINE);
 }
 
 uint16_t Gui::getStrHeight(){
@@ -139,6 +141,8 @@ Gui::Gui(){
     Serial.println(F("[GUI]Called Gui builder"));
 
     _tft = MCUFRIEND_kbv(CS, RS, WR, RD, _RST);
+    _tft.begin(_tft.readID());
+    _tft.setRotation(TOUCH_ORIENTATION);
 
     Serial.println(F("[GUI]_tft object correctly initialized"));
 
@@ -149,34 +153,34 @@ Gui::Gui(){
 
     File recipesFolder=SD.open(RECIPES_DIR);
     if (!recipesFolder) Serial.println(F("[GUI]Recipes folder not opened"));
-    else recipesFolder.printName(&Serial);
-    Serial.println();
+    else Serial.println(F("[GUI]Recipes filename list:"));
 
     File activeRecipe;
 
-    while (activeRecipe.openNext(&recipesFolder, O_RDONLY) && _recipesNum<=RECIPEBOOK_LEN) {
-        Serial.print(F("\n\n[GUI]Reading recipe named "));
+    while (activeRecipe.openNext(&recipesFolder, O_RDONLY)) {
         activeRecipe.printName(&Serial);
         Serial.println();
-        if (activeRecipe.isFile()) _recipes[_recipesNum]=Recipe(&activeRecipe, &_warehouse);
-        _recipes[_recipesNum].print();
-
+        if (activeRecipe.isFile() && !activeRecipe.isHidden()) _recipesNum++;
         activeRecipe.close();
-        _recipesNum++;
     }
 
     recipesFolder.close();
+    SD.end();
 
-    
+    Serial.print(F("[GUI] Files counted:"));
+    Serial.println(_recipesNum);
+
+    uiStatus._actual=BEGIN;
+    requestTransition(STATE_HOMEPAGE);
+
     _homepage=Homepage(this);
+    _homepage.show();
     /*
     _drinkPage=DrinkPage(this);
     _settingsPage=SettingsPage(this);
     _executionPage=ExecutionPage(this);
     */
 
-    uiStatus._actual=BEGIN;
-    uiStatus._next=BEGIN;
     requestRefresh();
 }
 
@@ -228,9 +232,9 @@ void Gui::show()
     completeTransition();
     completeRefresh();
 }
-*/
 
-/*
+
+
 bool Gui::interact(int xcc, int ycc)
 {
     switch (uiStatus._actual){
@@ -256,7 +260,8 @@ bool Gui::interact(int xcc, int ycc)
 */
 
 Gui::Homepage::Homepage(Gui *gui):_gui(gui){
-    _pagenum=_gui->_recipesNum/TILE4PAGE+_gui->_recipesNum%TILE4PAGE>0?1:0;
+    _pagenum=_gui->_recipesNum/TILE4PAGE;
+    if (_gui->_recipesNum%TILE4PAGE>0) _pagenum++;
     _pagei=0;
 
     uint16_t tile_spacing = 10, side_spacing = 10, radius = 10;
@@ -281,33 +286,59 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     for (int i = 0; i < _pagenum; i++)
     {
         x = side_spacing + (bw + button_spacing) * i;
-        navigationButtons[i].initButtonUL(&gui->_tft, x, y, bw, bh, radius, i == _pagei ? CCCC : C, CC, CCCC, &numbers[i*2] ,1);
+        navigationButtons[i].initButtonUL(&gui->_tft, x, y, bw, bh, radius, i == _pagei ? CCCC : C, CC, CCCC, numbers+i*2 ,1);
     }
     settingsButton.initButtonUL(&gui->_tft, 275, 435, 40, 40, 10, CC, CC, C, "", 1);
 }
 
-
 void Gui::Homepage::show()
 {
-    if (_gui->requestedTransition()) _gui->_tft.fillScreen(C_BACK);
     _gui->_tft.setFont(&FreeSans9pt7b);
+    _gui->_tft.fillScreen(C_BACK);
 
-    for (int i=0; i<TILE4PAGE; i++){
-        _gui->showTileUL(&(drinkButtons[i]), &(_gui->_recipes[i]));
+    //stores names relative to the _pagei into _gui->_recipeNames
+    SdFat SD;
+    SD.begin(SD_SS, SPI_FULL_SPEED);
+
+    File recipesFolder=SD.open(RECIPES_DIR), activeRecipe;
+    if (!recipesFolder) Serial.println(F("[GUI]Recipes folder not opened"));
+    int openedFiles=0, idx = 0;
+    while (idx < TILE4PAGE && activeRecipe.openNext(&recipesFolder, O_RDONLY)) {
+
+        if (activeRecipe.isFile() && !activeRecipe.isHidden()){
+            if (idx >= _pagei*TILE4PAGE){
+                activeRecipe.getName(_gui->_recipesNames[idx], sizeof(_gui->_recipesNames[idx]));
+                //remove the extension
+                _gui->_recipesNames[idx][strlen(_gui->_recipesNames[idx])-4]='\0';
+                idx++;
+            }
+            openedFiles++;
+        }
+        activeRecipe.close();
     }
 
-    if (_gui->requestedTransition()){
-            for (int i = 0; i < _pagenum; i++) navigationButtons[i].drawButton();
-            settingsButton.drawButton();
-            _gui->drawCustomRGBBitmap(275, 435, 40, 40, CCCC ,settings_bmp);
+    recipesFolder.close();
+    SD.end();
+
+    if (_gui->requestedTransition()) {
+        _gui->_tft.fillScreen(C_BACK);
+        _gui->_tft.fillRect(0, 430, 320, 50, C);
+        for (int i = 0; i < _pagenum; i++) navigationButtons[i].drawButton();
+        settingsButton.drawButton();
+        _gui->drawCustomRGBBitmap(275, 435, 40, 40, CCCC ,settings_bmp);
     }
+
+    for (int i=0; i<min(TILE4PAGE, _gui->_recipesNum-TILE4PAGE*_pagei); i++){
+        _gui->showTileUL(&(drinkButtons[i]), _gui->_recipesNames[i]);
+    }
+
 }
 
 bool Gui::Homepage::interact(int xcc, int ycc)
 {
     for (int i=0; i<TILE4PAGE; i++){
         if (drinkButtons[i].contains(xcc, ycc)){
-            _gui->setSelectedRecipe(&_gui->_recipes[i+TILE4PAGE*_pagei]);
+            _gui->setSelectedRecipeDir(_gui->_recipesNames[i]);
             _gui->requestTransition(STATE_DRINK);
             return true;
         }
@@ -581,14 +612,21 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
 
 */
 
-void Gui::setSelectedRecipe(Recipe *selectedRecipe)
+void Gui::setSelectedRecipeDir(char *recipeName)
 {
-    uiStatus._selectedRecipe=selectedRecipe;
+    SdFat SD;
+    SD.begin(SD_SS, SD_SCK_MHZ(16));
+    char buf[RECIPE_NAME_LEN+10];
+    sprintf(buf, "%s%s.csv", RECIPES_DIR, recipeName);
+    File f = SD.open(buf);
+    uiStatus._activeRecipe=Recipe(&f, &_warehouse);
+    f.close();
+    SD.end();
 }
 
-Recipe *Gui::getSelectedRecipe()
+Recipe *Gui::getSelectedRecipeDir()
 {
-    return uiStatus._selectedRecipe;
+    return &uiStatus._activeRecipe;
 }
 
 void Gui::requestTransition(State newState)
