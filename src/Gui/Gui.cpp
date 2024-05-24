@@ -1,73 +1,56 @@
 #include "Gui.h"
 
-void Gui::showTextCL(const char *text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line)
+void Gui::showTextCL(char *text, uint16_t xl, uint16_t yc, const GFXfont *font, uint8_t size, uint16_t color, uint16_t numLines, uint16_t lineSpacing, int16_t char4line)
 {
+
     if (font!=NULL) _tft.setFont(font);
     else _tft.setFont(&FreeSans9pt7b);
-    _tft.setTextSize(size);
-    _tft.setTextColor(color);
-    if (h==-1){ 
-        h=getStrHeight();
-        _tft.setCursor(xl, yc + h - size);
-    } else if (h==0){
-        _tft.setCursor(xl, yc+h/2);
-    } else {
-        _tft.setCursor(xl, yc);
-    }
+    if (size>0) _tft.setTextSize(size);
+    else _tft.setTextSize(1);
+    if (color!=NULL) _tft.setTextColor(color);
+    else _tft.setTextColor(CCCC);
 
-    char *buf=new char[strlen(text)];
-    strcpy(buf, text);
+    uint16_t str_h = getStrHeight();
 
-    if (strlen(buf) < char4line || char4line==-1)
-    {
-        _tft.print(buf);
-        delete(buf);
-        return;
-    }
-    else
-    {
-        char *token;
-        int nchar = 0;
-        token = strtok(buf, " ");
-        while (token != NULL)
-        {
-            int tokn = strlen(token);
-            if (nchar + tokn <= char4line)
-            {
-                nchar += tokn;
-                _tft.print(token);
-                _tft.print(" "); // Aggiungi uno spazio tra le parole
-            }
-            else if (tokn > char4line)
-            { // Caso in cui la parola supera la lunghezza massima per riga
-                char *buf2=new char [char4line];
-                size_t nc = strlcpy(buf2, token, char4line - nchar);
-                _tft.print(buf2);
-                _tft.print(" "); // Aggiungi uno spazio
-                if ((nchar + strlen(token)) / char4line >= 2){
-                    delete buf2, buf; return;
-                }
-                _tft.setCursor(xl, yc+h/2);
-                strcpy(buf2, token + nc);
-                _tft.print(buf2);
-                nchar = sizeof(tokn);
-                
-                delete buf2;
-            }
-            else
-            {
-                if ((nchar + strlen(token)) / char4line >= 2){delete buf; return;}
-                nchar = char4line;
-                _tft.setCursor(xl, yc+h/2);
-                _tft.print(token);
-                _tft.print(" "); // Aggiungi uno spazio
-                nchar += strlen(token);
-            }
+    if (numLines<1) numLines=1;
+    if (lineSpacing<=0) lineSpacing=str_h/2;
+    if (numLines==1 ) lineSpacing=0;
+    if (char4line==0) char4line=999;
+    
+    int printedLineLenght = 0;
+    int printedLinesNumber = 0;
+    uint16_t yl=yc-(numLines*str_h+(numLines-1)*lineSpacing)/2+str_h;
 
-            token = strtok(NULL, " ");
+    //sposta il cursore per la prima linea
+    _tft.setCursor(xl, yl);
+
+    for (char * token = strtok(text, " ");  token!=NULL && printedLinesNumber<numLines; token=strtok(NULL, " ")){
+
+        if (printedLineLenght+strlen(token)>char4line){
+            //calcolo il nuovo yl
+            yl+=(str_h+lineSpacing);
+            //sposta il cursore alla nuova riga
+            _tft.setCursor(xl, yl);
+            // incrementa il contatore del numero di righe stampate 
+            printedLinesNumber++;
+            //modifica printedlinelenght
+            printedLineLenght=(strlen(token)+1);
+            if (printedLinesNumber<numLines){
+                //stampa la nuova parola
+                _tft.print(token);_tft.print(" ");
+            }
+        } else {
+            //incrementa il numero di caratteri per riga
+            printedLineLenght+=(strlen(token)+1);
+            //stampa la nuova parola
+            _tft.print(token);_tft.print(" ");
         }
     }
-    delete buf;
+}
+
+void Gui::showTextCL(char *text, uint16_t xl, uint16_t yc, uint16_t color, int16_t char4line)
+{
+    showTextCL(text, xl, yc, &FreeSans9pt7b, 1, color, 1, 0, char4line);
 }
 
 void Gui::showImageBL(const char *dir, int x, int y)
@@ -116,7 +99,7 @@ void Gui::drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h, uint16
     _tft.endWrite();
 }
 
-void Gui::showTileUL(Button* button, const char* label)
+void Gui::showTileUL(Button* button, char* label)
 {
     int16_t x = button->getX1(),y = button->getY1(); 
     uint16_t w = button->getW(),h = button->getH(),radius = button->getRadius();
@@ -127,14 +110,13 @@ void Gui::showTileUL(Button* button, const char* label)
     showImageBL(buf, x + 10 , y + h - textbox_h+10);
     _tft.fillRoundRect(x, y + h - textbox_h, w, textbox_h, radius - 2, CCC);
     _tft.drawRoundRect(x, y + h - textbox_h, w, textbox_h, radius - 2, CCCC);
-    showTextCL(label, x + radius / 2, y + h - textbox_h/2, textbox_h - radius, &FreeSans9pt7b, 1, CCCC, TILE_CHAR4LINE);
+    showTextCL(label, x+radius/2, y+h-textbox_h/2, &FreeSans9pt7b, 1, CCCC, 2, 4, TILE_CHAR4LINE);
 }
 
 uint16_t Gui::getStrHeight(){
     int16_t x1, y1;
     uint16_t w,h;
     _tft.getTextBounds("ABC", 100, 100, &x1, &y1, &w, &h );
-    Serial.println("Ho letto questo numero di altezza: "+ String(h));
     return h;
 }
 
@@ -376,12 +358,13 @@ void Gui::SettingsPage::show()
         aqty=tempIng->getQuantity();
         mqty=tempIng->getMaxQuantity();
         _gui->_tft.setCursor(x,y);
-        sprintf(buffer, "%02d. %-10.10s", i+1, tempIng->getName());
+        sprintf(buffer, "%02d. %-15s%s", i+1, tempIng->getName(), strlen(tempIng->getName())>15?"...":"");
         _gui->_tft.print(buffer);
         _gui->_tft.drawRect(215, y-12, 104, 13, CCCC);
-        _gui->_tft.fillRect(217, y-10, (aqty/mqty*100), 9, (aqty/mqty*100)>50?CCCC:((aqty/mqty*100)>25?TFT_ORANGE:TFT_RED));
+        double perc = (1.0*aqty)/mqty*100.0;
+        _gui->_tft.fillRect(217, y-10, floor(perc), 9, perc>50?CCCC:(perc>25?TFT_ORANGE:TFT_RED));
         _gui->_tft.setCursor(165,y);
-        sprintf(buffer, "%3d%%", aqty/mqty*100);
+        sprintf(buffer, "%3d%%", (int) perc);
         _gui->_tft.print(buffer);
         y+=15;
     }
@@ -412,6 +395,9 @@ void Gui::ExecutionPage::show()
         if (it->getAction()==ADD) {
             _gui->_tft.print(it->getIngredient()->getName());_gui->_tft.print("  ");
             _gui->_tft.println(it->getModQty());
+
+            //eeprom ingredient consumption to simulate drink making
+            it->getIngredient()->subtractQuantity(it->getModQty());
         } else _gui->_tft.println(" ");
     }
 
@@ -462,9 +448,10 @@ void Gui::DrinkPage::show()
 
         char buf[BUF_LEN];
         sprintf(buf, "%.10s\0", selRecipe->getName());
-        _gui->showTextCL(buf, 9, 20, -1, &FreeSansBold12pt7b, 2, CCCC, -1);
 
         x=9, y=65, w=50, h=60, r=25;
+        _gui->showTextCL(buf, x, y/2, &FreeSansBold12pt7b, 2, CCCC, 1, 0, 0);
+
         _gui->drawCustomRGBBitmap(x,y,w,h,CCCC,back_bmp);
         x+=w+13;
         _small.unpress();
@@ -497,12 +484,13 @@ void Gui::DrinkPage::show()
                 //label
                 x=20;
                 sprintf(buf, "%.10s%s\0", r->getIngredient()->getName(), strlen(r->getIngredient()->getName())>10?"...":"");
-                _gui->showTextCL(buf, x, y+h/2, -1, &FreeSansBold12pt7b, 1, CCCC, -1);
+                buf[0]>=97?buf[0]-=32:false;//to capitolize the first letter
+                _gui->showTextCL(buf, x, y+h/2, &FreeSansBold12pt7b, 1, CCCC, 1, 0, 0);
 
                 //qty
                 x=145+w+10;
                 sprintf(buf, "%d\0", r->getModQty());
-                _gui->showTextCL(buf, x, y+h/2, -1, &FreeSansBold12pt7b, 1, CCCC, -1);
+                _gui->showTextCL(buf, x, y+h/2, &FreeSansBold12pt7b, 1, CCCC, 1, 0, 0);
 
                 //buttons
                 x=145;
@@ -547,13 +535,13 @@ void Gui::DrinkPage::show()
                     bool thereis = selRecipe->addIngredientQty(r->getIngredient(), r->getIngredient()->isLiquid()?-10:-1);
                     sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(r->getIngredient()));
                     _gui->_tft.fillRect(145+w+1, y, w-15,h, C_BACK);
-                    _gui->showTextCL(buf, 145+w+10, y+h/2, -1, &FreeSansBold12pt7b, 1, thereis?CCCC:TFT_RED, -1);
+                    _gui->showTextCL(buf, 145+w+10, y+h/2, &FreeSansBold12pt7b, 1, thereis?CCCC:TFT_RED, 1, 0, 0);
                     break;
                 } else if (_settings[printed][1].justChanged()){ //plus
                     bool thereis = selRecipe->addIngredientQty(r->getIngredient(), r->getIngredient()->isLiquid()?10:1);
                     sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(r->getIngredient()));
                     _gui->_tft.fillRect(145+w+1, y, w-15,h, C_BACK);
-                    _gui->showTextCL(buf, 145+w+10, y+h/2, -1, &FreeSansBold12pt7b, 1, thereis?CCCC:TFT_RED, -1);
+                    _gui->showTextCL(buf, 145+w+10, y+h/2, &FreeSansBold12pt7b, 1, thereis?CCCC:TFT_RED, 1, 0, 0);
                     break;                
                 }
 
@@ -667,7 +655,7 @@ void Gui::showPopup(char *error)
 {
     _tft.fillRoundRect(20, _tft.height()/5*2, _tft.width()-40, _tft.height()/5, 20, C);
     _tft.drawRoundRect(20, _tft.height()/5*2, _tft.width()-40, _tft.height()/5, 20, CCCC);
-    showTextCL(error, 25, _tft.height()/2, 0 , &FreeSans9pt7b, 1, CCCC, 25);
+    showTextCL(error, 25, _tft.height()/2, &FreeSans9pt7b, 1, CCCC, 3, 0, 30);
     delay(2000);
 
     requestTransition(uiStatus._actual);

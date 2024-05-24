@@ -116,10 +116,11 @@ class Gui{
         void showPopup(char* error);
 
         //drawing methods
-        void showTextCL(const char* text, uint16_t xl, uint16_t yc, int16_t h, const GFXfont *font, uint8_t size, uint16_t color, int16_t char4line);
+        void showTextCL(char *text, uint16_t xl, uint16_t yc, const GFXfont *font, uint8_t size, uint16_t color, uint16_t numLines, uint16_t lineSpacing, int16_t char4line);
+        void showTextCL(char *text, uint16_t xl, uint16_t yc, uint16_t color, int16_t char4line);
         void showImageBL(const char* dir, int x, int y);
         void drawCustomRGBBitmap(int16_t x, int16_t y, int16_t w, int16_t h ,uint16_t color,const uint16_t bitmap[]);
-        void showTileUL(Button *button, const char* label);
+        void showTileUL(Button *button, char* label);
         uint16_t getStrHeight();
 
     public:
