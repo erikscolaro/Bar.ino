@@ -134,6 +134,7 @@ uint16_t Gui::getStrHeight(){
     int16_t x1, y1;
     uint16_t w,h;
     _tft.getTextBounds("ABC", 100, 100, &x1, &y1, &w, &h );
+    Serial.println("Ho letto questo numero di altezza: "+ String(h));
     return h;
 }
 
@@ -174,17 +175,14 @@ Gui::Gui(){
     requestTransition(STATE_HOMEPAGE);
 
     _homepage=Homepage(this);
-    _homepage.show();
-    /*
     _drinkPage=DrinkPage(this);
     _settingsPage=SettingsPage(this);
     _executionPage=ExecutionPage(this);
-    */
+    
 
     requestRefresh();
 }
 
-/*
 void Gui::show()
 {
 
@@ -221,6 +219,7 @@ void Gui::show()
            //power on screen...
            _tft.fillScreen(C_BACK);
            _tft.println("Beginning gui...");
+           requestTransition(STATE_HOMEPAGE);
            break;
        default:
            Serial.print(F("[GUI]Error: transition to state "));
@@ -232,8 +231,6 @@ void Gui::show()
     completeTransition();
     completeRefresh();
 }
-
-
 
 bool Gui::interact(int xcc, int ycc)
 {
@@ -257,7 +254,6 @@ bool Gui::interact(int xcc, int ycc)
             return false;
     }
 }
-*/
 
 Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     _pagenum=_gui->_recipesNum/TILE4PAGE;
@@ -338,7 +334,7 @@ bool Gui::Homepage::interact(int xcc, int ycc)
 {
     for (int i=0; i<TILE4PAGE; i++){
         if (drinkButtons[i].contains(xcc, ycc)){
-            _gui->setSelectedRecipeDir(_gui->_recipesNames[i]);
+            _gui->setSelectedRecipeName(_gui->_recipesNames[i]);
             _gui->requestTransition(STATE_DRINK);
             return true;
         }
@@ -361,8 +357,6 @@ bool Gui::Homepage::interact(int xcc, int ycc)
     return false;
 }
 
-/*
-
 Gui::SettingsPage::SettingsPage(Gui *gui):_gui(gui)
 {
 }
@@ -373,7 +367,7 @@ void Gui::SettingsPage::show()
 
     int x=5, y=15, h=8, w=100;
     int16_t i=0, aqty, mqty;
-    char buffer[BUF_LEN], ingname[BUF_LEN];
+    char buffer[BUF_LEN];
     _gui->_tft.setFont(&FreeSans9pt7b);
     _gui->_tft.setTextSize(1);
     Ingredient* tempIng;
@@ -381,10 +375,8 @@ void Gui::SettingsPage::show()
         tempIng=_gui->_warehouse.getIngredient(i);
         aqty=tempIng->getQuantity();
         mqty=tempIng->getMaxQuantity();
-        strlcpy(ingname, tempIng->getName(), BUF_LEN-1);
-        //ingname[sizeof(tempIng->getName())]='\000';
         _gui->_tft.setCursor(x,y);
-        sprintf(buffer, "%02d. %-10.10s", i+1, ingname);
+        sprintf(buffer, "%02d. %-10.10s", i+1, tempIng->getName());
         _gui->_tft.print(buffer);
         _gui->_tft.drawRect(215, y-12, 104, 13, CCCC);
         _gui->_tft.fillRect(217, y-10, (aqty/mqty*100), 9, (aqty/mqty*100)>50?CCCC:((aqty/mqty*100)>25?TFT_ORANGE:TFT_RED));
@@ -410,7 +402,20 @@ void Gui::ExecutionPage::show()
 {
     //TODO
     _gui->_tft.fillScreen(C_BACK);
-    _gui->_tft.println("Not yet implemented. click to continue");
+    Recipe * r = _gui->getSelectedRecipeObj();
+
+    _gui->_tft.setFont(&FreeSans9pt7b);
+    _gui->_tft.setCursor(10,20);
+    _gui->_tft.println(r->getName());
+    for (Recipe::StepIterator it = r->begin(); it!=r->end(); ++it){
+        _gui->_tft.print((char) it->getAction());_gui->_tft.print("  ");
+        if (it->getAction()==ADD) {
+            _gui->_tft.print(it->getIngredient()->getName());_gui->_tft.print("  ");
+            _gui->_tft.println(it->getModQty());
+        } else _gui->_tft.println(" ");
+    }
+
+    _gui->showPopup("Non ancora implementato. Clicca per riavviare.");
 }
 
 bool Gui::ExecutionPage::interact(int xcc, int ycc)
@@ -438,9 +443,9 @@ Gui::DrinkPage::DrinkPage(Gui *gui): _gui(gui)
     x+=10, y=155, h=55, w=55, r=15;
     for (int i=0; i<SETTINGS_MAX_NUM; i++){
         x=145; 
-        this->_settings[i][0].initButtonUL(tftptr, x, y, w, h, r, CCCC, CC, CCCC, "-", 3);
+        this->_settings[i][0].initButtonUL(tftptr, x, y, w, h, r, CCCC, CC, CCCC, nullptr, 3);
         x=245;
-        this->_settings[i][1].initButtonUL(tftptr, x, y, w, h, r, CCCC, CC, CCCC, "+", 3);
+        this->_settings[i][1].initButtonUL(tftptr, x, y, w, h, r, CCCC, CC, CCCC, nullptr, 3);
         y+=h+10;
     }
 }
@@ -448,8 +453,7 @@ Gui::DrinkPage::DrinkPage(Gui *gui): _gui(gui)
 void Gui::DrinkPage::show()
 {
     //new text
-    Recipe* selRecipe = _gui->getSelectedRecipe();
-    Ingredient* const* ingredients = selRecipe->getIngredients();
+    Recipe* selRecipe = _gui->getSelectedRecipeObj();
     MCUFRIEND_kbv* tftptr = _gui->getTftptr();
     uint16_t x,y,h,w,r;
 
@@ -465,15 +469,15 @@ void Gui::DrinkPage::show()
         x+=w+13;
         _small.unpress();
         _small.drawButton();
-        _gui->drawCustomRGBBitmap(72,65,w,h, _small.isPressed()?CCCC:CCC, shot_bmp);
+        _gui->drawCustomRGBBitmap(x,65,w,h, _small.isPressed()?CCCC:CCC, shot_bmp);
         x+=w+13;
         _medium.press();
         _medium.drawButton();
-        _gui->drawCustomRGBBitmap(72,65,w,h, _medium.isPressed()?CCCC:CCC, medium_bmp);
+        _gui->drawCustomRGBBitmap(x,65,w,h, _medium.isPressed()?CCCC:CCC, medium_bmp);
         x+=w+13;
         _large.unpress();
         _large.drawButton();
-        _gui->drawCustomRGBBitmap(72,65,w,h, _large.isPressed()?CCCC:CCC, large_bmp);
+        _gui->drawCustomRGBBitmap(x,65,w,h, _large.isPressed()?CCCC:CCC, large_bmp);
         x+=w+13;
         _forward.drawButton();
         _gui->drawCustomRGBBitmap(x,y,w,h,CCCC,ok_bmp);
@@ -487,17 +491,18 @@ void Gui::DrinkPage::show()
 
         x+=10, y+=10, h=55, w=55;
         int i=0, printed=0; 
-        while (i<selRecipe->getIngredientsNum() && printed<SETTINGS_MAX_NUM){
-            if (ingredients[i]->isEditable()){
+
+        for( Recipe::StepIterator r = selRecipe->begin(); r!=selRecipe->end() && printed<SETTINGS_MAX_NUM; ++r){
+            if (r->getAction()==ADD && r->getIngredient()->isEditable()){
                 //label
                 x=20;
-                sprintf(buf, "%.10s%s\0", ingredients[i]->getName(), strlen(ingredients[i]->getName())>10?"...":"");
-                _gui->showTextCL(buf, x, y+h/2, -1, &FreeSans9pt7b, 1, CCCC, -1);
+                sprintf(buf, "%.10s%s\0", r->getIngredient()->getName(), strlen(r->getIngredient()->getName())>10?"...":"");
+                _gui->showTextCL(buf, x, y+h/2, -1, &FreeSansBold12pt7b, 1, CCCC, -1);
 
                 //qty
-                x=145+w+15;
-                sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(ingredients[i]));
-                _gui->showTextCL(buf, x, y+h/2, -1, &FreeSans9pt7b, 1, CCCC, -1);
+                x=145+w+10;
+                sprintf(buf, "%d\0", r->getModQty());
+                _gui->showTextCL(buf, x, y+h/2, -1, &FreeSansBold12pt7b, 1, CCCC, -1);
 
                 //buttons
                 x=145;
@@ -520,33 +525,35 @@ void Gui::DrinkPage::show()
         x+=w+13;
         if (_small.justChanged()){
             _small.drawButton();
-            _gui->drawCustomRGBBitmap(72,65,w,h, _small.isPressed()?CCCC:CCC, shot_bmp);
+            _gui->drawCustomRGBBitmap(x,65,w,h, _small.isPressed()?CCCC:CCC, shot_bmp);
         }
         x+=w+13;
         if (_medium.justChanged()){
             _medium.drawButton();
-            _gui->drawCustomRGBBitmap(72,65,w,h, _medium.isPressed()?CCCC:CCC, medium_bmp);
+            _gui->drawCustomRGBBitmap(x,65,w,h, _medium.isPressed()?CCCC:CCC, medium_bmp);
         }
         x+=w+13;
         if (_large.justChanged()){
             _large.drawButton();
-            _gui->drawCustomRGBBitmap(72,65,w,h, _large.isPressed()?CCCC:CCC, large_bmp);
+            _gui->drawCustomRGBBitmap(x,65,w,h, _large.isPressed()?CCCC:CCC, large_bmp);
         }
         x=20, y=155, h=55, w=55, r=15;
 
         int i=0, printed=0; 
-        while (i<selRecipe->getIngredientsNum() && printed<SETTINGS_MAX_NUM){
-            if (ingredients[i]->isEditable()){
+        for( Recipe::StepIterator r = selRecipe->begin(); r!=selRecipe->end() && printed<SETTINGS_MAX_NUM; ++r){
+            if (r->getAction()==ADD && r->getIngredient()->isEditable()){
                 //buttons
                 if (_settings[printed][0].justChanged()){ //minus
-                    bool thereis = selRecipe->addIngredientQty(ingredients[i], ingredients[i]->isLiquid()?-10:-1);
-                    sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(ingredients[i]));
-                    _gui->showTextCL(buf, 145+w+15, y+h/2, -1, &FreeSans9pt7b, 1, thereis?CCCC:TFT_RED, -1);
+                    bool thereis = selRecipe->addIngredientQty(r->getIngredient(), r->getIngredient()->isLiquid()?-10:-1);
+                    sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(r->getIngredient()));
+                    _gui->_tft.fillRect(145+w+1, y, w-15,h, C_BACK);
+                    _gui->showTextCL(buf, 145+w+10, y+h/2, -1, &FreeSansBold12pt7b, 1, thereis?CCCC:TFT_RED, -1);
                     break;
                 } else if (_settings[printed][1].justChanged()){ //plus
-                    bool thereis = selRecipe->addIngredientQty(ingredients[i], ingredients[i]->isLiquid()?10:1);
-                    sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(ingredients[i]));
-                    _gui->showTextCL(buf, 145+w+15, y+h/2, -1, &FreeSans9pt7b, 1, thereis?CCCC:TFT_RED, -1);
+                    bool thereis = selRecipe->addIngredientQty(r->getIngredient(), r->getIngredient()->isLiquid()?10:1);
+                    sprintf(buf, "%d\0", selRecipe->getIngredientRequiredQty(r->getIngredient()));
+                    _gui->_tft.fillRect(145+w+1, y, w-15,h, C_BACK);
+                    _gui->showTextCL(buf, 145+w+10, y+h/2, -1, &FreeSansBold12pt7b, 1, thereis?CCCC:TFT_RED, -1);
                     break;                
                 }
 
@@ -560,11 +567,18 @@ void Gui::DrinkPage::show()
 
 bool Gui::DrinkPage::interact(int xcc, int ycc)
 {
-    Recipe* selRecipe = _gui->uiStatus._selectedRecipe;
+    Recipe* selRecipe = &_gui->uiStatus._activeRecipe;
     if (_back.contains(xcc,ycc)) {
         _gui->requestTransition(STATE_HOMEPAGE);
         return true;
     } else if (_forward.contains(xcc,ycc)){
+        if (_large.isPressed()) selRecipe->adjustTotalVolume(DrinkCapacity::LARGE);
+        else if (_medium.isPressed()) selRecipe->adjustTotalVolume(DrinkCapacity::MEDIUM);
+        else if (_small.isPressed()) selRecipe->adjustTotalVolume(DrinkCapacity::SMALL);
+        else {
+            _gui->showPopup("ERRORE: seleziona la dimensione di un cocktail per procedere.");
+            return true;
+        }
         if (selRecipe->checkEnoughIngredientsInWarehouse()){
             _gui->requestTransition(STATE_EXECUTER);
         } else {
@@ -576,21 +590,18 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
         _medium.unpress();
         _large.unpress();
         _gui->requestRefresh();
-        selRecipe->adjustTotalVolume(DrinkCapacity::SMALL);
         return true;
     } else if (_medium.contains(xcc,ycc)){
         _small.unpress();
         _medium.press();
         _large.unpress();
         _gui->requestRefresh();
-        selRecipe->adjustTotalVolume(DrinkCapacity::MEDIUM);
         return true;
     } else if (_large.contains(xcc,ycc)){
         _small.unpress();
         _medium.unpress();
         _large.press();
         _gui->requestRefresh();
-        selRecipe->adjustTotalVolume(DrinkCapacity::LARGE);
         return true;
     } else {
         for (int i=0; i<SETTINGS_MAX_NUM; i++){
@@ -610,21 +621,19 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
     return false;
 }
 
-*/
-
-void Gui::setSelectedRecipeDir(char *recipeName)
+void Gui::setSelectedRecipeName(char *recipeName)
 {
     SdFat SD;
     SD.begin(SD_SS, SD_SCK_MHZ(16));
     char buf[RECIPE_NAME_LEN+10];
-    sprintf(buf, "%s%s.csv", RECIPES_DIR, recipeName);
+    sprintf(buf, "%s/%s.csv", RECIPES_DIR, recipeName);
     File f = SD.open(buf);
     uiStatus._activeRecipe=Recipe(&f, &_warehouse);
     f.close();
     SD.end();
 }
 
-Recipe *Gui::getSelectedRecipeDir()
+Recipe *Gui::getSelectedRecipeObj()
 {
     return &uiStatus._activeRecipe;
 }
@@ -656,14 +665,15 @@ void Gui::completeRefresh()
 
 void Gui::showPopup(char *error)
 {
-    _tft.fillRoundRect(20, _tft.height()/5*2, _tft.height()-40, _tft.height()/5, 20, CCCC);
-    _tft.drawRoundRect(20, _tft.height()/5*2, _tft.height()-40, _tft.height()/5, 20, CCCC);
-    _tft.setCursor(20, _tft.height()/2);
-    _tft.print(error);
+    _tft.fillRoundRect(20, _tft.height()/5*2, _tft.width()-40, _tft.height()/5, 20, C);
+    _tft.drawRoundRect(20, _tft.height()/5*2, _tft.width()-40, _tft.height()/5, 20, CCCC);
+    showTextCL(error, 25, _tft.height()/2, 0 , &FreeSans9pt7b, 1, CCCC, 25);
     delay(2000);
 
-    uiStatus._next=uiStatus._actual;
+    requestTransition(uiStatus._actual);
     uiStatus._actual=ERROR;
+
+    show();
 }
 
 bool Gui::requestedRefresh()

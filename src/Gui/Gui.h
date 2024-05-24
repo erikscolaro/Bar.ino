@@ -42,7 +42,7 @@ class Gui{
                 void show();
                 bool interact(int xcc, int ycc);
         };
-        /*
+        
 
         class SettingsPage{
             private: 
@@ -55,6 +55,7 @@ class Gui{
                 bool interact(int xcc, int ycc);
         };
 
+        
         class ExecutionPage{
             private: 
                 Gui* _gui;
@@ -79,15 +80,12 @@ class Gui{
                 void show();
                 bool interact(int xcc, int ycc);
         };
-        */
         //pages
 
         Homepage _homepage;
-        /*
         SettingsPage _settingsPage;
         ExecutionPage _executionPage;
         DrinkPage _drinkPage;
-        */
 
         //needed to manage page transition
         typedef struct {
@@ -100,8 +98,8 @@ class Gui{
         uiStatus_t uiStatus;
 
         //status methods
-        void setSelectedRecipeDir(char* recipeName);
-        Recipe* getSelectedRecipeDir();
+        void setSelectedRecipeName(char* recipeName);
+        Recipe* getSelectedRecipeObj();
 
         void requestTransition(State newState);
         bool requestedTransition();

@@ -60,7 +60,7 @@ bool Recipe::addIngredientQty(const Ingredient *ingredient, short qty)
 
     for (StepIterator it = begin(); it != end(); ++it) {
         if (it->getIngredient() == ingredient) {
-            if (_warehouse->isEnough(ingredient, it->getModQty() + qty)) {
+            if (_warehouse->isEnough(ingredient, it->getModQty() + qty) && (it->getModQty() + qty)>=0) {
                 it->addModQty(qty);
                 return true;
             } else {

@@ -39,13 +39,13 @@ void setup() {
   int i=0;
   SdFat SD;
   while (!SD.begin(SD_SS, SD_SCK_MHZ(16)) && i!= 5) {
-    Serial.println("SD card not ready...");
+    Serial.println(F("SD card not ready..."));
     i++;
   }
 
-  if (i==5){ Serial.println("HOHO...SD card not recognized! FATAL ERROR"); while(true);}
+  if (i==5){ Serial.println(F("HOHO...SD card not recognized! FATAL ERROR")); while(true);}
 
-  Serial.println("SD READY.");
+  Serial.println(F("SD READY."));
   SD.end();
 
 }
@@ -88,11 +88,10 @@ void loop() {
   Serial.println("GUI BUILDING");
   Gui interfaccia=Gui();
   Serial.println("GUI READY.");
-  //interfaccia.show();
-  while (true){delay(10);}
+  interfaccia.show();
   while (true){
     if (getXY(&interfaccia)){
-      //interfaccia.interact(cc.mapped_x, cc.mapped_y);
+      if (interfaccia.interact(cc.mapped_x, cc.mapped_y)) interfaccia.show();
     }
     delay(10);
   } 
