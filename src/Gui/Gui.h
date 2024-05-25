@@ -18,12 +18,11 @@ class Gui{
     private:
         //transversal
         MCUFRIEND_kbv _tft;
+        MCUFRIEND_kbv* getTftptr(){return &_tft;}
         Warehouse _warehouse;
         char _recipesNames[TILE4PAGE][RECIPE_NAME_LEN];
-        
-        
         short _recipesNum;
-        MCUFRIEND_kbv* getTftptr(){return &_tft;}
+        
 
         enum State {STATE_HOMEPAGE, STATE_DRINK, STATE_SETTINGS, STATE_EXECUTER, ERROR, BEGIN};
 
@@ -43,7 +42,6 @@ class Gui{
                 bool interact(int xcc, int ycc);
         };
         
-
         class SettingsPage{
             private: 
                 Gui* _gui;
@@ -55,7 +53,6 @@ class Gui{
                 bool interact(int xcc, int ycc);
         };
 
-        
         class ExecutionPage{
             private: 
                 Gui* _gui;
@@ -108,9 +105,6 @@ class Gui{
         void requestRefresh();
         bool requestedRefresh();
         void completeRefresh();
-
-        //interact
-        void checkInteractions(int16_t x, int16_t y);
 
         //error 
         void showPopup(char* error);

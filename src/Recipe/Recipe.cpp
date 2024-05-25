@@ -158,6 +158,9 @@ Recipe::Step::Step(char *line, Recipe *recipe){
             token = strtok(nullptr, DELIMITER_CHAR);
             this->_qty=strtol(token,nullptr, 10);
             this->_modQty=this->_qty;
+            if (!recipe->_warehouse->isEnough(this->_ingredient, this->_qty) && this->_ingredient->isEditable()) {
+                this->_modQty=this->_ingredient->getQuantity();
+            }             
             break;
         case MIX:
             break; //TODO

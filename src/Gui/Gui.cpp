@@ -21,10 +21,13 @@ void Gui::showTextCL(char *text, uint16_t xl, uint16_t yc, const GFXfont *font, 
     int printedLinesNumber = 0;
     uint16_t yl=yc-(numLines*str_h+(numLines-1)*lineSpacing)/2+str_h;
 
+    char *string = new char[strlen(text)+1];
+    strcpy(string, text);
+
     //sposta il cursore per la prima linea
     _tft.setCursor(xl, yl);
 
-    for (char * token = strtok(text, " ");  token!=NULL && printedLinesNumber<numLines; token=strtok(NULL, " ")){
+    for (char * token = strtok(string, " ");  token!=NULL && printedLinesNumber<numLines; token=strtok(NULL, " ")){
 
         if (printedLineLenght+strlen(token)>char4line){
             //calcolo il nuovo yl
@@ -110,7 +113,9 @@ void Gui::showTileUL(Button* button, char* label)
     showImageBL(buf, x + 10 , y + h - textbox_h+10);
     _tft.fillRoundRect(x, y + h - textbox_h, w, textbox_h, radius - 2, CCC);
     _tft.drawRoundRect(x, y + h - textbox_h, w, textbox_h, radius - 2, CCCC);
-    showTextCL(label, x+radius/2, y+h-textbox_h/2, &FreeSans9pt7b, 1, CCCC, 2, 4, TILE_CHAR4LINE);
+    sprintf(buf, "%s", label);
+    for (size_t i=0; i<strlen(buf); i++) if (buf[i]=='_') buf[i]=' '; 
+    showTextCL(buf, x+radius/2, y+h-textbox_h/2, &FreeSans9pt7b, 1, CCCC, 2, 4, TILE_CHAR4LINE);
 }
 
 uint16_t Gui::getStrHeight(){
@@ -264,7 +269,8 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
     for (int i = 0; i < _pagenum; i++)
     {
         x = side_spacing + (bw + button_spacing) * i;
-        navigationButtons[i].initButtonUL(&gui->_tft, x, y, bw, bh, radius, i == _pagei ? CCCC : C, CC, CCCC, numbers+i*2 ,1);
+        navigationButtons[i].initButtonUL(&gui->_tft, x, y, bw, bh, radius, C, CCCC, CC, CCCC, numbers+i*2 ,1);
+        if (i==0) navigationButtons[i].press();
     }
     settingsButton.initButtonUL(&gui->_tft, 275, 435, 40, 40, 10, CC, CC, C, "", 1);
 }
@@ -272,7 +278,6 @@ Gui::Homepage::Homepage(Gui *gui):_gui(gui){
 void Gui::Homepage::show()
 {
     _gui->_tft.setFont(&FreeSans9pt7b);
-    _gui->_tft.fillScreen(C_BACK);
 
     //stores names relative to the _pagei into _gui->_recipeNames
     SdFat SD;
@@ -280,12 +285,15 @@ void Gui::Homepage::show()
 
     File recipesFolder=SD.open(RECIPES_DIR), activeRecipe;
     if (!recipesFolder) Serial.println(F("[GUI]Recipes folder not opened"));
+
     int openedFiles=0, idx = 0;
+
     while (idx < TILE4PAGE && activeRecipe.openNext(&recipesFolder, O_RDONLY)) {
 
         if (activeRecipe.isFile() && !activeRecipe.isHidden()){
-            if (idx >= _pagei*TILE4PAGE){
-                activeRecipe.getName(_gui->_recipesNames[idx], sizeof(_gui->_recipesNames[idx]));
+            if (openedFiles >= _pagei*TILE4PAGE){
+
+                activeRecipe.getName(_gui->_recipesNames[idx], RECIPE_NAME_LEN);
                 //remove the extension
                 _gui->_recipesNames[idx][strlen(_gui->_recipesNames[idx])-4]='\0';
                 idx++;
@@ -304,11 +312,21 @@ void Gui::Homepage::show()
         for (int i = 0; i < _pagenum; i++) navigationButtons[i].drawButton();
         settingsButton.drawButton();
         _gui->drawCustomRGBBitmap(275, 435, 40, 40, CCCC ,settings_bmp);
+    } else if (_gui->requestedRefresh()){
+        _gui->_tft.fillRect(0, 0, 320, 429, C_BACK);
+        for (int i = 0; i < _pagenum; i++){
+            if (navigationButtons[i].justChanged()) navigationButtons[i].drawButton();
+        }
     }
 
     for (int i=0; i<min(TILE4PAGE, _gui->_recipesNum-TILE4PAGE*_pagei); i++){
         _gui->showTileUL(&(drinkButtons[i]), _gui->_recipesNames[i]);
     }
+
+    for(int i=0; i<TILE4PAGE; i++){
+        Serial.print("[GUI] recipeName: "); 
+        Serial.println(_gui->_recipesNames[i]);
+    } 
 
 }
 
@@ -325,7 +343,9 @@ bool Gui::Homepage::interact(int xcc, int ycc)
     for (int i = 0; i < _pagenum; i++)
     {
         if (navigationButtons[i].contains(xcc, ycc)){
-            _pagei=(_pagei+1)%_pagenum;
+            navigationButtons[_pagei].unpress();
+            _pagei=i;
+            navigationButtons[i].press();
             _gui->requestRefresh();
             return true;
         }
@@ -400,8 +420,8 @@ void Gui::ExecutionPage::show()
             it->getIngredient()->subtractQuantity(it->getModQty());
         } else _gui->_tft.println(" ");
     }
-
-    _gui->showPopup("Non ancora implementato. Clicca per riavviare.");
+    char* error = ERROR_MSG_not_implemented;
+    _gui->showPopup(error);
 }
 
 bool Gui::ExecutionPage::interact(int xcc, int ycc)
@@ -447,7 +467,8 @@ void Gui::DrinkPage::show()
         tftptr->fillScreen(C_BACK);
 
         char buf[BUF_LEN];
-        sprintf(buf, "%.10s\0", selRecipe->getName());
+        sprintf(buf, "%.10s%s\0", selRecipe->getName(), strlen(selRecipe->getName())>10?"...":"");
+        for (int i=0; i<strlen(buf); i++) if (buf[i]=='_') buf[i]=' '; 
 
         x=9, y=65, w=50, h=60, r=25;
         _gui->showTextCL(buf, x, y/2, &FreeSansBold12pt7b, 2, CCCC, 1, 0, 0);
@@ -483,7 +504,7 @@ void Gui::DrinkPage::show()
             if (r->getAction()==ADD && r->getIngredient()->isEditable()){
                 //label
                 x=20;
-                sprintf(buf, "%.10s%s\0", r->getIngredient()->getName(), strlen(r->getIngredient()->getName())>10?"...":"");
+                sprintf(buf, "%.12s%s\0", r->getIngredient()->getName(), strlen(r->getIngredient()->getName())>12?"...":"");
                 buf[0]>=97?buf[0]-=32:false;//to capitolize the first letter
                 _gui->showTextCL(buf, x, y+h/2, &FreeSansBold12pt7b, 1, CCCC, 1, 0, 0);
 
@@ -564,13 +585,15 @@ bool Gui::DrinkPage::interact(int xcc, int ycc)
         else if (_medium.isPressed()) selRecipe->adjustTotalVolume(DrinkCapacity::MEDIUM);
         else if (_small.isPressed()) selRecipe->adjustTotalVolume(DrinkCapacity::SMALL);
         else {
-            _gui->showPopup("ERRORE: seleziona la dimensione di un cocktail per procedere.");
+            char* error = ERROR_MSG_select_dimension;
+            _gui->showPopup(error);
             return true;
         }
         if (selRecipe->checkEnoughIngredientsInWarehouse()){
             _gui->requestTransition(STATE_EXECUTER);
         } else {
-            _gui->showPopup("Errore: non ci sono sufficienti ingredienti. Prova a modificare qualcosa o cambia cocktail.");
+            char* error = ERROR_MSG_not_enought_ingredients;
+            _gui->showPopup(error);
         }
         return true;
     } else if (_small.contains(xcc,ycc)){

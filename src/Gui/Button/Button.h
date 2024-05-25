@@ -7,6 +7,9 @@ public:
   void initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1, uint16_t w,
                     uint16_t h, uint16_t radius, uint16_t outline, uint16_t fill,
                     uint16_t textcolor, const char *label, uint8_t textsize);
+  void initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1, uint16_t w,
+                    uint16_t h, uint16_t radius, uint16_t outline, uint16_t outline_pressed, uint16_t fill,
+                    uint16_t textcolor, const char *label, uint8_t textsize);
   void drawButton();
 
   void setLabel(char *newLabel);
@@ -30,7 +33,7 @@ private:
   int16_t _x1, _y1;
   uint16_t _w, _h, _radius;
   uint8_t _textsize;
-  uint16_t _outlinecolor, _fillcolor, _textcolor;
+  uint16_t _outlinecolor, _outlinepressedcolor, _fillcolor, _textcolor;
   bool _isPressed, _justChanged;
   const char* _label;
 
